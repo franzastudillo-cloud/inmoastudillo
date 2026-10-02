@@ -242,9 +242,9 @@ export const Footer: React.FC<FooterProps> = ({
                 title="Acceso para el propietario / administrador"
               >
                 <span className="material-symbols-outlined text-[14px]">
-                  {isAdmin ? 'lock_open' : 'admin_panel_settings'}
+                  {isAdmin ? 'lock_open' : 'lock'}
                 </span>
-                <span>{isAdmin ? 'Modo Admin: Activo' : 'Acceso Admin'}</span>
+                <span>{isAdmin ? 'Edición Habilitada (Bloquear)' : 'Protegido en la Red'}</span>
               </button>
             )}
             {onOpenSeoStrategy && (

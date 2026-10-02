@@ -391,17 +391,21 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
               <button
                 type="button"
                 onClick={onToggleAdmin}
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ${
                   isAdmin
-                    ? 'bg-[#004215] text-[#aaf773] border border-[#aaf773]/40'
-                    : 'bg-[#caead8] hover:bg-[#aef3b0] text-[#004215] border border-[#326b00]/30'
+                    ? 'bg-amber-400 text-stone-900 border border-amber-300 font-extrabold shadow-sm'
+                    : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
                 }`}
-                title={isAdmin ? 'Desactivar Modo Administrador' : 'Activar Modo Administrador para cambiar fotos'}
+                title={
+                  isAdmin
+                    ? 'Modo Administrador activado. Clic para BLOQUEAR y proteger contra cambios.'
+                    : 'Sitio protegido contra modificaciones en la red. Clic para desbloquear con tu clave.'
+                }
               >
                 <span className="material-symbols-outlined text-[17px]">
-                  {isAdmin ? 'lock_open' : 'admin_panel_settings'}
+                  {isAdmin ? 'lock_open' : 'lock'}
                 </span>
-                <span>{isAdmin ? 'Modo Admin: ACTIVO' : 'Activar Modo Admin'}</span>
+                <span>{isAdmin ? 'Edición Habilitada (Bloquear)' : 'Protegido en la Red'}</span>
               </button>
             )}
 

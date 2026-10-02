@@ -11,6 +11,7 @@ import { ChangeImageModal } from './components/ChangeImageModal';
 import { PhotoSecurityGuideModal } from './components/PhotoSecurityGuideModal';
 import { EditPropertyModal } from './components/EditPropertyModal';
 import { SellerWelcomeModal } from './components/SellerWelcomeModal';
+import { AdminSecurityModal } from './components/AdminSecurityModal';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { HomeView } from './views/HomeView';
 import { PortfolioView } from './views/PortfolioView';
@@ -31,7 +32,7 @@ export default function App() {
     return PROPERTIES_DATA;
   });
 
-  // Admin Mode state (defaults to true in preview for Franz/Inmo Astudillo owner management)
+  // Admin Mode state: defaults to false (PROTECTED) so that on the public network (Cloudflare, etc.) the site cannot be edited without authorization
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     try {
       const savedAdmin = localStorage.getItem('inmo_astudillo_admin_mode');
@@ -39,9 +40,10 @@ export default function App() {
     } catch (e) {
       console.error('Error loading admin state:', e);
     }
-    return true; // Active so Franz can immediately change photos!
+    return false; // PROTECTED by default
   });
 
+  const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
   const [quickViewProperty, setQuickViewProperty] = useState<Property | null>(null);
   const [appointmentProperty, setAppointmentProperty] = useState<Property | null>(null);
   const [imageEditProperty, setImageEditProperty] = useState<Property | null>(null);
@@ -76,17 +78,29 @@ export default function App() {
     }
   };
 
-  // Toggle admin state
+  // Toggle admin state with security password protection
   const handleToggleAdmin = () => {
-    setIsAdmin((prev) => {
-      const next = !prev;
+    if (isAdmin) {
+      // If currently unlocked, lock immediately to protect against network edits
+      setIsAdmin(false);
       try {
-        localStorage.setItem('inmo_astudillo_admin_mode', String(next));
+        localStorage.setItem('inmo_astudillo_admin_mode', 'false');
       } catch (e) {
-        console.error('Error saving admin mode:', e);
+        console.error(e);
       }
-      return next;
-    });
+    } else {
+      // If locked, request security password
+      setIsAdminAuthOpen(true);
+    }
+  };
+
+  const handleAdminAuthSuccess = () => {
+    setIsAdmin(true);
+    try {
+      localStorage.setItem('inmo_astudillo_admin_mode', 'true');
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Reset properties to factory defaults
@@ -301,6 +315,13 @@ export default function App() {
         isOpen={isSellerModalOpen}
         onClose={handleCloseSellerModal}
         onOpenValuation={() => setIsValuationOpen(true)}
+      />
+
+      {/* Admin Security Password Modal (Protección en la red) */}
+      <AdminSecurityModal
+        isOpen={isAdminAuthOpen}
+        onClose={() => setIsAdminAuthOpen(false)}
+        onSuccess={handleAdminAuthSuccess}
       />
 
       {/* Floating Launcher Pill: ¿Quieres vender tu propiedad? */}

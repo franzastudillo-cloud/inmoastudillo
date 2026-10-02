@@ -65,14 +65,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
                   isAdmin
                     ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-stone-900 font-extrabold shadow-sm'
-                    : 'bg-emerald-900/80 text-emerald-200 hover:text-white hover:bg-emerald-800 border border-emerald-700/50'
+                    : 'bg-emerald-950/90 text-emerald-300 hover:text-white hover:bg-emerald-900 border border-emerald-400/50 shadow-xs'
                 }`}
-                title={isAdmin ? 'Desactivar Modo Administrador' : 'Modo Administrador (Para editar inmuebles)'}
+                title={
+                  isAdmin
+                    ? 'Modo Administrador activado. Clic para BLOQUEAR y proteger contra cambios desde la red.'
+                    : 'Modo Protegido en la Red activado. Nadie puede modificar la web sin tu clave de administrador.'
+                }
               >
                 <span className="material-symbols-outlined text-[13px]">
-                  {isAdmin ? 'lock_open' : 'admin_panel_settings'}
+                  {isAdmin ? 'lock_open' : 'lock'}
                 </span>
-                <span>{isAdmin ? 'Admin: ON' : 'Acceso Admin'}</span>
+                <span>{isAdmin ? 'Edición Habilitada (Bloquear)' : 'Protegido en la Red'}</span>
               </button>
             )}
           </div>
