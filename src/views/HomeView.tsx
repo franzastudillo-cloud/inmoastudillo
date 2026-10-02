@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Property, ViewType } from '../types';
-import { PROPERTIES_DATA, TESTIMONIALS } from '../data/propertiesData';
+import { PROPERTIES_DATA } from '../data/propertiesData';
 import { PropertyCard } from '../components/PropertyCard';
 
 interface HomeViewProps {
@@ -36,6 +36,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [homeCategory, setHomeCategory] = useState<'all' | 'residential' | 'land'>('all');
   const [quickAddress, setQuickAddress] = useState('');
 
+  // Security banner image state (persisted in localStorage or default to inmoastudillo-puyo.jpg)
+  const [securityImg, setSecurityImg] = useState<string>(() => {
+    return localStorage.getItem('inmo_security_image') || '/inmoastudillo-puyo.jpg';
+  });
+  const securityFileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleSecurityImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      setSecurityImg(dataUrl);
+      localStorage.setItem('inmo_security_image', dataUrl);
+      try {
+        await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dataUrl,
+            filename: 'inmoastudillo-puyo.jpg',
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to sync image to server:', err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const filteredFeatured = properties.filter((p) => {
     if (homeCategory === 'all') return true;
     return p.category === homeCategory;
@@ -61,7 +91,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   return (
     <div className="flex flex-col w-full">
       {/* 1. CINEMATIC HERO SECTION WITH REAL ESTATE VIDEO BACKGROUND */}
-      <section className="relative w-full bg-[#002107] text-white pt-16 pb-24 md:pb-32 px-6 lg:px-12 overflow-hidden">
+      <section className="relative w-full bg-slate-950 text-white pt-16 pb-24 md:pb-32 px-6 lg:px-12 overflow-hidden">
         {/* Dynamic 10-Second Real Estate Background Video */}
         <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
           <video
@@ -71,29 +101,28 @@ export const HomeView: React.FC<HomeViewProps> = ({
             playsInline
             preload="auto"
             poster="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80"
-            className="w-full h-full object-cover object-center scale-105"
+            className="w-full h-full object-cover object-center scale-105 brightness-105 contrast-105"
           >
             <source src="/videos/inmobiliaria-bg.mp4" type="video/mp4" />
           </video>
-          {/* Emerald Gradient Overlay for optimal legibility */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#00180a]/92 via-[#064e3b]/80 to-[#022c22]/95" />
-          <div className="absolute inset-0 bg-radial-at-t from-transparent via-[#064e3b]/30 to-[#022c22]/85" />
+          {/* Lightened Gradient Overlay - 50% more video clarity & vibrancy */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-[#00180a]/50" />
+          <div className="absolute inset-0 bg-radial-at-c from-transparent via-black/15 to-black/40" />
         </div>
 
-        {/* Architectural atmospheric background lights - Vibrant Emerald & Warm Amber Gold */}
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 left-10 w-96 h-96 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Subtle architectural atmospheric ambient lights */}
+        <div className="absolute top-0 right-1/4 w-[450px] h-[450px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 left-10 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-5xl mx-auto flex flex-col items-center text-center relative z-10">
           {/* Eyebrow badge with Live Video Indicator and Warm Amber Accent */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-950/80 text-amber-300 border border-amber-300/35 text-xs font-bold uppercase tracking-wider mb-6 shadow-md backdrop-blur-md">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-950/85 text-amber-300 border border-amber-300/40 text-xs font-bold uppercase tracking-wider mb-6 shadow-lg backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
             <span>Bienes Raíces & Trámites Notariales en Ecuador · Pastaza & Puyo</span>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight max-w-4xl text-balance drop-shadow-sm">
+          {/* Headline with high-contrast text shadow for perfect legibility over clear video */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight max-w-4xl text-balance drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
             Encuentra el hogar de tus sueños con{' '}
             <span className="bg-gradient-to-r from-amber-300 via-emerald-200 to-teal-200 bg-clip-text text-transparent">
               InmoAstudillo
@@ -101,7 +130,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-5 text-sm sm:text-base md:text-lg text-emerald-100/90 max-w-2xl leading-relaxed drop-shadow-xs">
+          <p className="mt-5 text-sm sm:text-base md:text-lg text-white font-medium max-w-2xl leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             Más de una década conectando familias e inversionistas con casas, terrenos y departamentos en Pastaza y todo el Ecuador. Transparencia certificada, avalúo comercial preciso y blindaje notarial en cada paso.
           </p>
         </div>
@@ -543,58 +572,190 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* 6. LA VOZ DE NUESTROS CLIENTES (TESTIMONIALS) */}
-      <section className="w-full bg-gradient-to-b from-[#f8faf8] via-amber-50/20 to-[#f8faf8] py-20 border-t border-b border-slate-200/80">
+      {/* 6. GARANTÍA DE SEGURIDAD JURÍDICA & PROTECCIÓN PATRIMONIAL */}
+      <section className="w-full bg-gradient-to-b from-slate-50 via-emerald-50/20 to-slate-50 py-20 border-t border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full border border-amber-300/40">
-              Experiencias Reales
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-3.5 py-1 rounded-full border border-emerald-300/60 shadow-xs">
+              <span className="material-symbols-outlined text-[15px] text-emerald-700">shield</span>
+              Seguridad & Respaldo Inmobiliario
             </span>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-3 tracking-tight">
-              La voz de nuestros clientes
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
+              Tu Patrimonio Protegido con Total Blindaje Notarial
             </h2>
-            <p className="text-xs md:text-sm text-slate-600 mt-2">
-              La confianza se gana con hechos. Descubre lo que dicen las familias y propietarios que eligieron Inmo Astudillo.
+            <p className="text-xs md:text-sm text-slate-600 mt-3 leading-relaxed max-w-2xl mx-auto">
+              En Pastaza y en todo el Ecuador, una inversión inmobiliaria debe brindarte absoluta tranquilidad. En <b>InmoAstudillo</b> auditamos cada documento antes de cualquier negociación para que compres o vendas con 100% de certeza legal.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, idx) => {
-              const avatarGradients = [
-                'bg-gradient-to-br from-emerald-500 to-teal-700',
-                'bg-gradient-to-br from-sky-500 to-blue-700',
-                'bg-gradient-to-br from-amber-500 to-orange-600',
-              ];
-              return (
-                <div
-                  key={idx}
-                  className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-xl hover:border-amber-200 transition-all flex flex-col justify-between gap-5 group"
-                >
-                  <div className="flex flex-col gap-3.5">
-                    <div className="flex text-amber-400 gap-0.5">
-                      {[...Array(t.rating)].map((_, i) => (
-                        <span key={i} className="material-symbols-outlined text-[20px] fill-1 text-amber-400">
-                          star
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-xs text-slate-700 italic leading-relaxed">
-                      "{t.quote}"
-                    </p>
-                  </div>
+          {/* Two-Column Security Showcase */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            {/* Left: Security Imagery & Trust Badges */}
+            <div className="lg:col-span-5 relative">
+              <input
+                type="file"
+                ref={securityFileInputRef}
+                onChange={handleSecurityImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <div 
+                className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-950 aspect-[4/5] sm:aspect-square lg:aspect-[4/5] group cursor-pointer"
+                onClick={() => securityFileInputRef.current?.click()}
+                title="Haz clic para seleccionar o actualizar la foto de seguridad (inmoastudillo-puyo.jpg)"
+              >
+                <img
+                  src={securityImg}
+                  alt="Cbr. Franz Daniel Astudillo - InmoAstudillo Puyo"
+                  className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('unsplash')) {
+                      target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
+                    }
+                  }}
+                  referrerPolicy="no-referrer"
+                />
 
-                  <div className="flex items-center gap-3 pt-3.5 border-t border-slate-100">
-                    <div className={`w-11 h-11 rounded-2xl ${avatarGradients[idx % avatarGradients.length]} text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm`}>
-                      {t.author.substring(0, 2).toUpperCase()}
+                {/* Direct Upload Button */}
+                <div className="absolute top-4 right-4 z-20">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      securityFileInputRef.current?.click();
+                    }}
+                    className="bg-black/75 hover:bg-emerald-900 text-white px-3.5 py-1.5 rounded-full text-[11px] font-bold shadow-lg backdrop-blur-md transition-all flex items-center gap-1.5 border border-white/20 hover:border-amber-300 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[15px] text-amber-300">photo_camera</span>
+                    <span>Cambiar / Subir Foto</span>
+                  </button>
+                </div>
+
+                {/* Badges only shown if using external fallback without embedded badges */}
+                {!securityImg.startsWith('data:image') && !securityImg.includes('inmoastudillo') && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent pointer-events-none" />
+                    <div className="absolute top-4 left-4 flex items-center gap-1.5">
+                      <div className="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-emerald-100 flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-900">
+                        <span className="material-symbols-outlined text-[16px] text-emerald-600">verified_user</span>
+                        <span>100% Blindaje Legal</span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900">{t.author}</h4>
-                      <span className="text-[10px] text-slate-500 font-medium">{t.role}</span>
+                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-slate-200/90 text-slate-900">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-[22px]">gavel</span>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-slate-900">
+                            Auditoría Registral Previa
+                          </h4>
+                          <p className="text-[11px] text-slate-600">
+                            Licencia Profesional Acbrp - 005 · Cbr. Franz Astudillo
+                          </p>
+                        </div>
+                      </div>
                     </div>
+                  </>
+                )}
+
+                {/* Hover instruction helper */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center pointer-events-none">
+                  <div className="bg-white/95 text-slate-900 px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-emerald-100">
+                    <span className="material-symbols-outlined text-[18px] text-emerald-700">upload_file</span>
+                    <span>Seleccionar inmoastudillo-puyo.jpg</span>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* Right: 4 Security Pillars */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
+              {/* Pillar 1: Registro de la Propiedad */}
+              <div className="p-4.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs border border-emerald-100 mt-0.5">
+                  <span className="material-symbols-outlined text-[22px]">policy</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    1. Verificación Exhaustiva en el Registro de la Propiedad
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Comprobamos certificados de gravámenes actualizados, solvencia municipal y antecedentes de dominio para garantizar que el bien esté libre de hipotecas, embargos o prohibiciones de enajenar.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 2: Contratos Notariados sin Sorpresas */}
+              <div className="p-4.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 shadow-xs border border-teal-100 mt-0.5">
+                  <span className="material-symbols-outlined text-[22px]">contract</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    2. Contratos y Minutas Notariadas Transparentes
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Redactamos promesas de compraventa y minutas de transferencia con cláusulas claras, plazos justos y depósitos en garantía mutua. Sin letra chica ni sorpresas financieras.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 3: Acompañamiento Notarial Directo */}
+              <div className="p-4.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 shadow-xs border border-amber-100 mt-0.5">
+                  <span className="material-symbols-outlined text-[22px]">assignment_ind</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    3. Acompañamiento Personal en Notaría y Municipio
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    El Cbr. Franz Daniel Astudillo te acompaña personalmente a la Notaría y Municipio para la liquidación de impuestos, alcabalas, plusvalías y la inscripción legal definitiva.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 4: Gestión de Crédito Hipotecario Seguro */}
+              <div className="p-4.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 shadow-xs border border-blue-100 mt-0.5">
+                  <span className="material-symbols-outlined text-[22px]">account_balance</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    4. Coordinación Bancaria y Créditos Hipotecarios
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Facilitamos los avalúos periciales y la carpeta técnica requerida por BIESS, Banco Pichincha, Pacífico, Cooperativas y entidades financieras para la aprobación ágil de tu crédito.
+                  </p>
+                </div>
+              </div>
+
+              {/* Direct WhatsApp Call to Action Strip */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href="https://wa.me/593994773533?text=Hola%20Cbr.%20Franz%20Astudillo,%20deseo%20asesor%C3%ADa%20segura%20para%20la%20compra%20o%20venta%20de%20un%20inmueble."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 hover:from-emerald-700 hover:to-teal-900 text-white text-xs font-bold transition-all shadow-md shadow-emerald-900/15 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <span className="material-symbols-outlined text-[18px]">chat</span>
+                  <span>Consultar Seguridad Legal por WhatsApp</span>
+                </a>
+
+                {onOpenValuation && (
+                  <button
+                    onClick={onOpenValuation}
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-[17px] text-amber-600">calculate</span>
+                    <span>Avalúo Comercial Gratuito</span>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>

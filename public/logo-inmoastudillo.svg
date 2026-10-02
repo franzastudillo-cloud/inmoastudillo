@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" width="100%" height="100%">
+  <defs>
+    <!-- Left facet lighter forest green -->
+    <linearGradient id="logoLeftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#40804c" />
+      <stop offset="100%" stop-color="#2a6336" />
+    </linearGradient>
+    <!-- Right facet deep emerald green -->
+    <linearGradient id="logoRightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#235a32" />
+      <stop offset="100%" stop-color="#143e20" />
+    </linearGradient>
+    <!-- Leaf fresh green -->
+    <linearGradient id="logoLeafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4d893f" />
+      <stop offset="100%" stop-color="#6ba750" />
+    </linearGradient>
+    <filter id="logoShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+  <!-- ================= ICON EMBLEM ================= -->
+  <g id="emblem" transform="translate(0, 5)">
+    <!-- Right leg of A (Deep Green) -->
+    <path 
+      d="M 300 25 L 405 245 L 358 245 L 328 185 L 300 130 Z" 
+      fill="url(#logoRightGrad)" 
+    />
+    <!-- Left leg of A (Lighter Facet Green) -->
+    <path 
+      d="M 300 25 L 195 245 L 242 245 L 272 185 L 300 130 Z" 
+      fill="url(#logoLeftGrad)" 
+    />
+
+    <!-- Bottom Feet bases -->
+    <polygon points="405,245 340,245 352,220 405,245" fill="#143e20" />
+    <polygon points="195,245 260,245 248,220 195,245" fill="#2a6336" />
+
+    <!-- House Roof Peak in Apex -->
+    <path d="M 300 115 L 324 148 L 276 148 Z" fill="#143e20" />
+    <path d="M 300 115 L 276 148 L 284 148 L 300 126 L 316 148 L 324 148 Z" fill="#2a6336" />
+
+    <!-- 4-Pane Window -->
+    <g fill="#143e20">
+      <rect x="287" y="154" width="10" height="10" rx="1" />
+      <rect x="303" y="154" width="10" height="10" rx="1" />
+      <rect x="287" y="168" width="10" height="10" rx="1" />
+      <rect x="303" y="168" width="10" height="10" rx="1" />
+    </g>
+
+    <!-- Organic swoosh wave crossing A -->
+    <path 
+      d="M 210 245 C 248 215 280 198 312 196 C 348 194 374 180 395 138 C 382 158 354 175 314 177 C 282 179 246 198 210 245 Z" 
+      fill="#143e20" 
+    />
+    <path 
+      d="M 235 238 C 266 210 298 196 330 193 C 365 190 385 162 398 134 C 389 155 362 174 326 175 C 294 177 262 194 235 238 Z" 
+      fill="#2a6336" 
+      opacity="0.9"
+    />
+
+    <!-- Fresh Green Leaf at top right -->
+    <path 
+      d="M 386 148 C 384 116 395 78 422 60 C 424 86 415 120 386 148 Z" 
+      fill="url(#logoLeafGrad)" 
+      filter="url(#logoShadow)"
+    />
+    <!-- Leaf central vein -->
+    <path 
+      d="M 387 146 Q 403 112 421 61" 
+      stroke="#ffffff" 
+      stroke-width="1.8" 
+      stroke-linecap="round" 
+      fill="none" 
+      opacity="0.8" 
+    />
+  </g>
+
+  <!-- ================= TYPOGRAPHY ================= -->
+  <!-- INMO -->
+  <text 
+    x="300" 
+    y="320" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Montserrat', sans-serif" 
+    font-size="64" 
+    font-weight="900" 
+    letter-spacing="4" 
+    fill="#1b4d2e"
+  >
+    INMO
+  </text>
+
+  <!-- ASTUDILLO -->
+  <text 
+    x="300" 
+    y="386" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Montserrat', sans-serif" 
+    font-size="60" 
+    font-weight="900" 
+    letter-spacing="3.5" 
+    fill="#0f172a"
+  >
+    ASTUDILLO
+  </text>
+
+  <!-- SLOGAN: “DONDE LOS SUEÑOS SE HACEN REALIDAD” -->
+  <text 
+    x="300" 
+    y="430" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Montserrat', sans-serif" 
+    font-size="22" 
+    font-weight="700" 
+    letter-spacing="2" 
+    fill="#0f172a"
+  >
+    “DONDE LOS SUEÑOS
+  </text>
+  <text 
+    x="300" 
+    y="462" 
+    text-anchor="middle" 
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Montserrat', sans-serif" 
+    font-size="22" 
+    font-weight="700" 
+    letter-spacing="2" 
+    fill="#0f172a"
+  >
+    SE HACEN REALIDAD”
+  </text>
+</svg>

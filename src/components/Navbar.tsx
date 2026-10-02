@@ -51,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-amber-300 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-amber-300/30">
               <span className="material-symbols-outlined text-[13px]">verified</span>
-              Acbir Pastaza Licenciado
+              Licencia Profesional Acbrp - 005
             </span>
             <button
               onClick={onOpenValuation}

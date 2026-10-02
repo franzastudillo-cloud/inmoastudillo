@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CONVEYANCING_STEPS, LEGAL_SERVICES, LEGAL_TESTIMONIALS, FAQS } from '../data/propertiesData';
+import { CONVEYANCING_STEPS, LEGAL_SERVICES, FAQS } from '../data/propertiesData';
 
 interface ConveyancingViewProps {
   onOpenAppointmentModal: () => void;
@@ -28,6 +28,36 @@ export const ConveyancingView: React.FC<ConveyancingViewProps> = ({ onOpenAppoin
   const [procedureType, setProcedureType] = useState('Compraventa Completa');
   const [propertyLocation, setPropertyLocation] = useState('Puyo / Pastaza / Quito');
   const [propertyNotes, setPropertyNotes] = useState('');
+
+  // Security banner image state (persisted in localStorage or default to inmoastudillo-puyo.jpg)
+  const [securityImg, setSecurityImg] = useState<string>(() => {
+    return localStorage.getItem('inmo_security_image') || '/inmoastudillo-puyo.jpg';
+  });
+  const securityFileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleSecurityImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      setSecurityImg(dataUrl);
+      localStorage.setItem('inmo_security_image', dataUrl);
+      try {
+        await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dataUrl,
+            filename: 'inmoastudillo-puyo.jpg',
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to sync image to server:', err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Toggle checkmark in checklist
@@ -655,50 +685,174 @@ export const ConveyancingView: React.FC<ConveyancingViewProps> = ({ onOpenAppoin
         </div>
       </section>
 
-      {/* 6. CASOS DE ÉXITO & TESTIMONIOS */}
+      {/* 6. GARANTÍA DE SEGURIDAD JURÍDICA & BLINDAJE NOTARIAL */}
       <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16 w-full">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#326b00]">
-            Garantía Inmo Astudillo
-          </span>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#004215] mt-1 tracking-tight">
-            Casos de Éxito y Familias Tranquilas
-          </h2>
-          <p className="text-xs md:text-sm text-[#41493f] mt-1">
-            Más de 250 operaciones inmobiliarias legalizadas con total seguridad jurídica.
-          </p>
-        </div>
+        <div className="bg-gradient-to-b from-[#f8faf8] via-white to-[#f8faf8] rounded-3xl p-8 md:p-12 border border-slate-200/90 shadow-sm">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-3.5 py-1 rounded-full border border-emerald-300/60 shadow-xs">
+              <span className="material-symbols-outlined text-[15px] text-emerald-700">verified_user</span>
+              Garantía Registral & Notarial InmoAstudillo
+            </span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#004215] mt-3 tracking-tight">
+              Blindaje Jurídico y Seguridad Notarial Total
+            </h2>
+            <p className="text-xs md:text-sm text-slate-600 mt-2 leading-relaxed">
+              Tu patrimonio protegido en cada paso: cero vicios ocultos, escrituración transparente y respaldo legal directo ante Notaría Pública y el Registro de la Propiedad.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {LEGAL_TESTIMONIALS.map((t, idx) => (
-            <div
-              key={idx}
-              className="bg-white p-6 rounded-2xl border border-[#e1e3e0] shadow-sm flex flex-col justify-between gap-4"
-            >
-              <div className="flex flex-col gap-3">
-                <div className="flex text-[#326b00]">
-                  {[...Array(t.rating)].map((_, i) => (
-                    <span key={i} className="material-symbols-outlined text-[18px] fill-1 text-[#326b00]">
-                      star
-                    </span>
-                  ))}
-                </div>
-                <p className="text-xs text-[#191c1b] italic leading-relaxed">
-                  "{t.quote}"
-                </p>
-              </div>
+          {/* Two-Column Security Showcase */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            {/* Left: Professional Security Image */}
+            <div className="lg:col-span-5 relative">
+              <input
+                type="file"
+                ref={securityFileInputRef}
+                onChange={handleSecurityImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <div 
+                className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-slate-900 aspect-[4/3] sm:aspect-square lg:aspect-[4/3] group cursor-pointer"
+                onClick={() => securityFileInputRef.current?.click()}
+                title="Haz clic para seleccionar o actualizar la foto de seguridad (inmoastudillo-puyo.jpg)"
+              >
+                <img
+                  src={securityImg}
+                  alt="Firma y blindaje legal notarial en InmoAstudillo"
+                  className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('unsplash')) {
+                      target.src = 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1000&q=80';
+                    }
+                  }}
+                  referrerPolicy="no-referrer"
+                />
 
-              <div className="flex items-center gap-3 pt-3 border-t border-[#eceeeb]">
-                <div className="w-10 h-10 rounded-full bg-[#004215] text-[#aef3b0] text-xs font-bold flex items-center justify-center shrink-0">
-                  {t.author.substring(0, 2).toUpperCase()}
+                {/* Direct Upload Button */}
+                <div className="absolute top-4 right-4 z-20">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      securityFileInputRef.current?.click();
+                    }}
+                    className="bg-black/75 hover:bg-emerald-900 text-white px-3 py-1.5 rounded-full text-[11px] font-bold shadow-lg backdrop-blur-md transition-all flex items-center gap-1.5 border border-white/20 hover:border-amber-300 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[15px] text-amber-300">photo_camera</span>
+                    <span>Cambiar / Subir Foto</span>
+                  </button>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#191c1b]">{t.author}</h4>
-                  <span className="text-[10px] text-[#717a6e]">{t.role}</span>
+
+                {/* Badges only shown if using external fallback without embedded badges */}
+                {!securityImg.startsWith('data:image') && !securityImg.includes('inmoastudillo') && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent pointer-events-none" />
+                    <div className="absolute top-4 left-4 flex items-center gap-1">
+                      <div className="bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-md text-[10px] font-extrabold text-emerald-900 flex items-center gap-1 border border-emerald-200">
+                        <span className="material-symbols-outlined text-[14px] text-emerald-600">shield</span>
+                        <span>100% Blindaje Legal</span>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg border border-slate-200 text-slate-900">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-[18px]">gavel</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-slate-900">Auditoría Registral Previa</span>
+                          <span className="text-[10px] text-slate-500 font-medium">Licencia Profesional Acbrp - 005</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Hover instruction helper */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center pointer-events-none">
+                  <div className="bg-white/95 text-slate-900 px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-emerald-100">
+                    <span className="material-symbols-outlined text-[18px] text-emerald-700">upload_file</span>
+                    <span>Seleccionar inmoastudillo-puyo.jpg</span>
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
+
+            {/* Right: 4 Security Guarantees */}
+            <div className="lg:col-span-7 flex flex-col gap-3.5">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-start gap-3.5 hover:border-emerald-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-100">
+                  <span className="material-symbols-outlined text-[19px]">policy</span>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">1. Estudio de Títulos y Certificado de Gravamen</h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                    Constatación en el Registro de la Propiedad de Pastaza de que el inmueble esté libre de prendas, litigios, hipotecas o embargos.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-start gap-3.5 hover:border-emerald-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5 border border-teal-100">
+                  <span className="material-symbols-outlined text-[19px]">description</span>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">2. Promesas y Minutas Blindadas por Abogado Notarial</h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                    Contratos con cláusulas equitativas que aseguran el valor entregado en arras o anticipo y estipulan plazos y penalidades claras.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-start gap-3.5 hover:border-emerald-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 border border-amber-100">
+                  <span className="material-symbols-outlined text-[19px]">calculate</span>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">3. Liquidación Transparente de Impuestos Municipales</h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                    Determinación oficial y cálculo exacto de alcabalas, plusvalías y cartas prediales sin cobros indebidos.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-start gap-3.5 hover:border-emerald-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 mt-0.5 border border-blue-100">
+                  <span className="material-symbols-outlined text-[19px]">key</span>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">4. Entrega Segura de Llaves y Posesión Inmediata</h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                    Acompañamiento en el acto solemne de entrega y recepción pacífica del bien inmueble una vez asentada la firma en Notaría.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onOpenAppointmentModal}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 hover:from-emerald-700 hover:to-teal-900 text-white text-xs font-bold transition-all shadow-md shadow-emerald-900/15 flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+                >
+                  <span className="material-symbols-outlined text-[17px]">calendar_month</span>
+                  <span>Agendar Asesoría Notarial Sin Costo</span>
+                </button>
+
+                <a
+                  href="https://wa.me/593994773533?text=Hola%20Cbr.%20Franz%20Astudillo,%20deseo%20asesor%C3%ADa%20segura%20para%20un%20tr%C3%A1mite%20notarial."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[17px] text-emerald-600">chat</span>
+                  <span>Consultar por WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

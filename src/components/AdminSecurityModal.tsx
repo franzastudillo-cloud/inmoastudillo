@@ -135,7 +135,7 @@ export const AdminSecurityModal: React.FC<AdminSecurityModalProps> = ({
             Solo Cbr. Franz Astudillo
           </span>
           <span className="text-slate-400">
-            Licencia ACBIR Nº 034
+            Licencia Profesional Acbrp - 005
           </span>
         </div>
       </div>
