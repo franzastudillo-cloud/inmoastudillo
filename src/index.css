@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+
+  --color-primary: #065f46;
+  --color-primary-container: #047857;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #a7f3d0;
+  --color-primary-fixed: #d1fae5;
+
+  --color-secondary: #059669;
+  --color-secondary-container: #10b981;
+  --color-secondary-fixed: #34d399;
+  --color-secondary-fixed-dim: #6ee7b7;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-fixed-variant: #064e3b;
+  --color-on-secondary-container: #065f46;
+
+  --color-tertiary: #d97706;
+  --color-tertiary-container: #f59e0b;
+  --color-tertiary-fixed: #fef3c7;
+  --color-on-tertiary-fixed: #78350f;
+
+  --color-surface: #fbfcfb;
+  --color-surface-dim: #f3f4f3;
+  --color-surface-bright: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f8faf8;
+  --color-surface-container: #f1f4f1;
+  --color-surface-container-high: #e9ece9;
+  --color-surface-container-highest: #e2e6e2;
+  --color-surface-variant: #e2e6e2;
+
+  --color-on-surface: #111827;
+  --color-on-surface-variant: #374151;
+  --color-outline: #6b7280;
+  --color-outline-variant: #d1d5db;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #fbfcfb;
+  color: #111827;
+  overflow-x: hidden;
+}
+
+/* Material Symbols optical styling */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  vertical-align: middle;
+}
+
+.material-symbols-outlined.fill-1 {
+  font-variation-settings: 'FILL' 1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f2f4f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #c0c9bc;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1a5b28;
+}

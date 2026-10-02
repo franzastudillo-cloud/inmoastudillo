@@ -1,0 +1,6 @@
+{
+  "name": "Inmo Astudillo | Bienes Raíces y Trámites en Ecuador",
+  "description": "Inmobiliaria en Pastaza y Ecuador. Venta de casas, lotes y trámites de compraventa notarial con Cbr. Daniel Astudillo (Acbir Pastaza).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
