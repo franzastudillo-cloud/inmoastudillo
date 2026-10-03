@@ -3,96 +3,221 @@ import { Property } from '../types';
 export const PROPERTIES_DATA: Property[] = [
   {
     id: 1,
-    title: 'Ático Dúplex de Vanguardia con Terraza Panorámica',
+    title: 'Casa Moderna de 2 Pisos con Garaje Eléctrico en Barrio Cumandá',
     category: 'residential',
-    price: 680000,
-    priceFormatted: '$680,000 USD',
-    priceLabel: 'Precio de Inversión',
-    location: 'Chamberí, Calle de Zurbano 45',
-    locationZone: 'Chamberí',
-    address: 'Calle de Zurbano 45, Chamberí',
-    shortDescription: 'Extraordinario ático de dos plantas con acabados en maderas nobles, cocina italiana integrada y vistas despejadas a la ciudad. Listo para escrituración inmediata.',
-    description: 'Exclusivo ático dúplex situado en una de las vías más distinguidas de Chamberí. Distribución impecable en dos alturas conectadas por una escalera escultórica de acero y roble. Incluye terraza privada de 45 m² con orientación sur, domótica integral, climatización por aerotermia, bodega privada y dos plazas de garaje de acceso directo.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC16BTa8UPzzmcW70xItexI23vcbnJ1XHFgMAxPwzjwiaLdUJonEgtVGcb9GqpZC_kjmwNUF2Lx0u70AF-30u-v5VW05pKjMG1lagY8qBP3EW7ufFw8CzBNUOmDKaKIpwWD-bmpZNKjfZtBPpGuh_0Qy6oFfmAsrc3sDs5nqDCgDTCaZ3ETRfFUi8dowLOPMlxwXkciid5nWSM3CtN4HXwlYzbUPv9HiP6-r5qiC77buX23k0VBiOaIHQ',
-    fallbackGradient: 'from-emerald-950 via-slate-900 to-emerald-900',
+    price: 115000,
+    priceFormatted: '$115,000 USD',
+    priceLabel: 'Venta Directa',
+    location: 'Barrio Cumandá, Puyo, Pastaza',
+    locationZone: 'Barrio Cumandá',
+    address: 'Barrio Cumandá, Sector Residencial Consolidado, Puyo',
+    shortDescription: 'Imponente casa de 2 plantas con diseño moderno en Barrio Cumandá. Garaje eléctrico, master mini-suite con baño privado, 2 dormitorios y 3 baños completos.',
+    description: 'Propiedad residencial destacada de Inmo Astudillo ubicada en el codiciado Barrio Cumandá de Puyo. Diseño de dos pisos cómodo y funcional: garaje eléctrico con portón automático, sala y comedor acogedores, cocina equipada con acabados de primera, 3 baños completos, dos dormitorios con armarios empotrados y una master mini-suite privada con su propio baño. Lista para entrega con escrituras saneadas y apta para crédito hipotecario BIESS o bancario.',
+    imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-emerald-950 via-teal-950 to-slate-900',
     photoCount: 18,
-    badges: ['En Venta', 'Exclusivo'],
+    badges: ['Publicación Facebook', 'Barrio Cumandá', 'Garaje Eléctrico', 'En Venta'],
     specs: {
-      surface: '210 m²',
-      rooms: '3 Hab.',
-      bathrooms: '3.5 Baños',
-      parking: '2 Coch.'
+      surface: '220 m²',
+      rooms: '3 Hab. + Mini-Suite',
+      bathrooms: '3 Baños Completos',
+      parking: '1 Garaje Eléctrico'
     },
     highlights: [
-      'Terraza privada panorámica de 45 m²',
-      'Cocina italiana de diseñador con encimeras de cuarzo',
-      'Certificación energética A+ con aerotermia',
-      'Titulación saneada y libre de hipotecas'
+      'Garaje cerrado con portón eléctrico automatizado',
+      'Master mini-suite con baño privado y clósets empotrados',
+      '3 baños completos con acabados modernos',
+      'Cocina, sala y comedor totalmente equipados y funcionales',
+      'Escrituras públicas al día libres de gravámenes en Pastaza'
     ],
     legalCertified: true,
     featured: true
   },
   {
     id: 2,
-    title: 'Terreno Residencial / Lote Urbanizado de Alta Plusvalía',
+    title: 'Terreno Esquinero Comercial de 805 m² en Puyo',
     category: 'land',
-    price: 185000,
-    priceFormatted: '$185,000 USD',
+    price: 98000,
+    priceFormatted: '$98,000 USD',
     priceLabel: 'Oportunidad de Inversión',
-    location: 'Sector Residencial Privado, Valle Verde',
-    locationZone: 'Valle Verde',
-    address: 'Urbanización Privada Valle Verde, Manzana C - Lote 14',
-    shortDescription: 'Lote 100% plano listo para construir residencia personalizada dentro de urbanización con garita de seguridad, cableado subterráneo y áreas recreativas.',
-    description: 'Lote residencial regular con topografía totalmente plana, situado en el corazón del exclusivo desarrollo Valle Verde. Cuenta con acometida subterránea de agua potable, electricidad trifásica, fibra óptica soterrada y alcantarillado con planta de tratamiento. Zona de alta proyección y seguridad privada 24/7 con control biométrico. Títulos de propiedad inscritos y listos para transferencia inmediata.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHvtA4ieWVCzE-Qi-fKEdUhFnMPl1u5r5op31xocNzHTlECDgqGxK3w-pEe80XWX1xG-d_JrKIAmJ52zmSfVBlWo4QwB5Xgi5EMtOt-1pRqaayq1ZEvuaXvg9_7dXYkEhvdghLDnmhpKZbDl98zCplh7q6JBK77nlfOJDC1UYGLZ5lMcAw1nOA5hYxPqOjRxiDdPVhQcL8SRVCzVWQjkw2jHPzHWwOVzx5esWMNj_ia9iAuv6Pr1R4GQ',
-    fallbackGradient: 'from-green-950 via-emerald-900 to-stone-900',
-    photoCount: 12,
-    badges: ['Terreno / Lote', 'Alta Plusvalía'],
+    location: 'Sector Comercial Estratégico, Puyo, Pastaza',
+    locationZone: 'Puyo',
+    address: 'Esquina Comercial de Alto Flujo, Puyo, Pastaza',
+    shortDescription: 'Excelente lote esquinero de 805 m² con ubicación comercial de alta plusvalía y vistas impresionantes en Puyo. Ideal para edificación o negocios.',
+    description: 'Gran oportunidad de inversión presentada por Inmo Astudillo: lote esquinero de 805 m² en una de las mejores ubicaciones comerciales de Puyo. Vista panorámica privilegiada, doble frente a calles principales, topografía favorable y todos los servicios básicos al pie. Ideal para plaza comercial, oficinas, concesionaria o conjunto habitacional.',
+    imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-amber-950 via-emerald-950 to-slate-900',
+    photoCount: 14,
+    badges: ['Lote Esquinero', '805 m²', 'Comercial Puyo', 'Alta Plusvalía'],
     specs: {
-      surface: '850 m²',
-      landUse: 'Resid. R2',
-      services: '100%',
-      topography: 'Plano'
+      surface: '805 m²',
+      landUse: 'Comercial / Resid.',
+      services: '100% Factibilidad',
+      topography: 'Esquinero Regular'
     },
     highlights: [
-      'Topografía 100% plana sin necesidad de movimiento de tierras',
-      'Urbanización cerrada con seguridad 24/7 y cámaras perimetrales',
-      'Servicios básicos subterráneos completos (agua, luz, fibra óptica)',
-      'Permiso de construcción aprobado para residencia unifamiliar'
+      '805 m² de superficie con amplio frente esquinero a dos vías',
+      'Ubicación comercial privilegiada con impresionante vista en Puyo',
+      'Factibilidad total de servicios básicos (agua, luz, alcantarillado)',
+      'Escritura pública libre de hipotecas y lista para traspaso'
     ],
     legalCertified: true,
     featured: true
   },
   {
     id: 3,
-    title: 'Villa Minimalista con Piscina y Jardín Privado',
-    category: 'residential',
-    price: 940000,
-    priceFormatted: '$940,000 USD',
-    priceLabel: 'Propiedad Premium',
-    location: 'La Moraleja, Paseo del Conde',
-    locationZone: 'La Moraleja',
-    address: 'Paseo del Conde 12, La Moraleja',
-    shortDescription: 'Residencia de autor concebida con eficiencia energética integral, domótica de última generación, jardín perimetral privado y piscina climatizada sinfín.',
-    description: 'Obra maestra de la arquitectura contemporánea que fusiona el diseño cúbico con la naturaleza circundante. Gran salón con techos de 3.4 metros de altura y ventanales correderos que desaparecen en los muros. Suite principal en planta baja con vestidor iluminado y sala de baño con hidromasaje. Piscina desbordante con depuración salina, zona chill-out con pérgola bioclimática y garaje cerrado para 3 vehículos.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAvE7pu9VHL3E_e-t5sK6mRfswtagvhK0D9hL7jAgP7db_WxlUDEh9SdZOt-jDL7r418maE7IC23XKg25Gic-GOvHpIzHfVbt4YMllD_y1qZegbU6xbpyluPW87K1Wp_5csbrkOGndqCUpfgOxuOyS72meDl2GNwqnb1gTScDYFjLUH7ij7NeJ8zviuosPVAWKBPfVER6hYA793k8panf52kXyTjRgwHYHWxURMHG4R2Z84iopPO1EIjg',
-    fallbackGradient: 'from-emerald-950 via-teal-950 to-neutral-900',
-    photoCount: 24,
-    badges: ['En Venta', 'Villa'],
+    title: 'Lote Residencial Urbanizado de Alta Plusvalía en Puyo',
+    category: 'land',
+    price: 45000,
+    priceFormatted: '$45,000 USD',
+    priceLabel: 'Oportunidad de Inversión',
+    location: 'Sector Los Ángeles / El Dorado, Puyo, Pastaza',
+    locationZone: 'Puyo',
+    address: 'Sector Los Ángeles, Calle de Acceso Principal, Puyo',
+    shortDescription: 'Lote 100% plano listo para construir residencia personalizada dentro de zona de alta plusvalía. Servicios completos y escrituración inmediata.',
+    description: 'Excelente lote residencial de topografía totalmente plana, situado en uno de los sectores de mayor crecimiento y plusvalía de Puyo. Cuenta con acometida de agua potable, electricidad, alcantarillado y fibra óptica disponible. Documentación totalmente al día en el Registro de la Propiedad del Cantón Pastaza, libre de hipotecas y gravámenes. Apto para financiamiento con BIESS o banca privada.',
+    imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-emerald-950 via-slate-900 to-emerald-900',
+    photoCount: 12,
+    badges: ['Lote en Puyo', 'Escritura Inmediata', 'Califica BIESS'],
     specs: {
-      surface: '420 m²',
-      rooms: '5 Hab.',
-      bathrooms: '5 Baños',
-      parking: '3 Coch.'
+      surface: '450 m²',
+      landUse: 'Residencial',
+      services: '100% Activos',
+      topography: '100% Plano'
     },
     highlights: [
-      'Piscina infinita con sistema de climatización y cloración salina',
-      'Sistema domótico Lutron & KNX para iluminación y climatización',
-      'Jardín paisajístico con olivos centenarios y riego automatizado',
-      'Carpintería de aluminio Schüco con aislamiento acústico supremo'
+      'Topografía regular plana sin necesidad de relleno ni movimiento de tierras',
+      'Escritura pública individualizada inscrita en el Registro de la Propiedad',
+      'Servicios básicos completos al pie del lote (agua, luz, alcantarillado)',
+      'Apto para crédito hipotecario BIESS o banca privada'
     ],
     legalCertified: true,
     featured: true
+  },
+  {
+    id: 4,
+    title: 'Casa Residencial Familiar con Acabados de Primera en Puyo',
+    category: 'residential',
+    price: 118000,
+    priceFormatted: '$118,000 USD',
+    priceLabel: 'Venta Directa',
+    location: 'Sector Barrio Obrero / Las Palmas, Puyo, Pastaza',
+    locationZone: 'Barrio Obrero',
+    address: 'Barrio Obrero, Sector Residencial Consolidado, Puyo',
+    shortDescription: 'Hermosa casa familiar con finos acabados en madera de cedro, sala a doble altura, jardín frontal, área BBQ y garaje cerrado para 2 vehículos.',
+    description: 'Imponente casa residencial diseñada para brindar confort y seguridad a toda la familia. Distribución en dos plantas: sala principal amplia con doble altura, comedor, cocina estilo americano con muebles de madera sólida y mesones de granito. Master suite con vestidor y baño privado, más 2 dormitorios con baño compartido. Amplio patio posterior con área de lavandería cubierta y zona BBQ. Cero gravámenes y lista para traspaso notarial.',
+    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-green-950 via-emerald-900 to-stone-900',
+    photoCount: 16,
+    badges: ['Casa en Venta', 'Exclusivo Puyo', 'Garantía Notarial'],
+    specs: {
+      surface: '260 m²',
+      rooms: '3 Hab.',
+      bathrooms: '2.5 Baños',
+      parking: '2 Coch.'
+    },
+    highlights: [
+      'Construcción de hormigón armado con acabados en porcelanato y cedro',
+      'Zona BBQ techada y patio posterior con cerramiento perimetral alto',
+      'Línea telefónica, agua caliente con calefón y fibra óptica instalada',
+      'Titulación saneada y libre de hipotecas en Pastaza'
+    ],
+    legalCertified: true,
+    featured: true
+  },
+  {
+    id: 5,
+    title: 'Quinta Vacacional con Árboles Frutales y Río Cristalino',
+    category: 'land',
+    price: 78000,
+    priceFormatted: '$78,000 USD',
+    priceLabel: 'Oportunidad Amazónica',
+    location: 'Vía a Fátima / San Javier, Pastaza',
+    locationZone: 'Fátima',
+    address: 'Vía a Fátima Km 4, Pastaza',
+    shortDescription: 'Amplia quinta vacacional de 3,500 m² con orilla de río, árboles frutales amazónicos, cabaña rústica habitable y acceso carrozable asfaltado.',
+    description: 'Extraordinaria propiedad campestre perfecta para descanso, turismo ecológico o quinta familiar en Pastaza. Rodeada de exuberante vegetación y con acceso a un río de agua limpia. Cuenta con cabaña rústica de dos ambientes, acometida eléctrica y agua de vertiente natural. Acceso directo por vía asfaltada y alumbrado público. Libre de prohibiciones de enajenar.',
+    imageUrl: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-emerald-950 via-teal-950 to-neutral-900',
+    photoCount: 14,
+    badges: ['Quinta / Finca', 'Río & Naturaleza', 'Alta Plusvalía'],
+    specs: {
+      surface: '3,500 m²',
+      landUse: 'Campestre',
+      services: 'Agua / Luz',
+      topography: 'Semi-plano'
+    },
+    highlights: [
+      'Lindero natural con estero y río de aguas cristalinas',
+      'Plantación de árboles frutales amazónicos en producción',
+      'Acceso carrozable en perfecto estado a solo 10 minutos del centro de Puyo',
+      'Escritura pública notarial sin gravámenes'
+    ],
+    legalCertified: true,
+    featured: true
+  },
+  {
+    id: 6,
+    title: 'Departamento Moderno a Estrenar en el Centro de Puyo',
+    category: 'residential',
+    price: 68000,
+    priceFormatted: '$68000 USD',
+    priceLabel: 'Entrega Inmediata',
+    location: 'Calle Lucindo Ortega y Ceslao Marín, Puyo Centro',
+    locationZone: 'Puyo Centro',
+    address: 'Calle Lucindo Ortega, Edificio Central, Puyo',
+    shortDescription: 'Departamento de 3 dormitorios con vista panorámica, balcón, parqueadero cubierto y bodega. Cerca de notarías, bancos y comercios.',
+    description: 'Ubicación inmejorable en el corazón comercial y administrativo de Puyo. Departamento en edificio residencial con ascensor, sistema contra incendios y control de accesos. Sala-comedor con amplios ventanales, cocina con anaqueles de primera y área de máquinas independiente. Califica para crédito hipotecario con cualquier entidad financiera o BIESS.',
+    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-slate-950 via-emerald-950 to-emerald-900',
+    photoCount: 15,
+    badges: ['Departamento', 'Centro de Puyo', 'Estreno'],
+    specs: {
+      surface: '115 m²',
+      rooms: '3 Hab.',
+      bathrooms: '2 Baños',
+      parking: '1 Coch.'
+    },
+    highlights: [
+      'Ubicación céntrica privilegiada a pasos de bancos y notarías',
+      'Propiedad Horizontal (PH) debidamente legalizada con clave catastral propia',
+      'Parqueadero cubierto y bodega privada en subsuelo',
+      'Asesoría completa en tramitación notarial y crédito hipotecario'
+    ],
+    legalCertified: true,
+    featured: false
+  },
+  {
+    id: 7,
+    title: 'Terreno Comercial Estratégico sobre Vía Principal en Puyo',
+    category: 'land',
+    price: 135000,
+    priceFormatted: '$135,000 USD',
+    priceLabel: 'Comercial Premium',
+    location: 'Av. Alberto Zambrano, Puyo, Pastaza',
+    locationZone: 'Av. Alberto Zambrano',
+    address: 'Av. Alberto Zambrano, frente a zona de alto flujo, Puyo',
+    shortDescription: 'Lote comercial de 800 m² con 20 metros de frente a la avenida principal. Ideal para distribuidora, concesionario o edificio de oficinas.',
+    description: 'Propiedad con potencial comercial inigualable en la arteria vial de mayor circulación de Puyo. Topografía plana, uso de suelo comercial-residencial múltiple con permiso para edificación en altura. Factibilidad para todos los servicios de alta demanda. Escritura pública lista para transferencia inmediata sin ningún tipo de litigio ni gravamen.',
+    imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
+    fallbackGradient: 'from-amber-950 via-stone-900 to-emerald-950',
+    photoCount: 10,
+    badges: ['Comercial', 'Av. Principal', 'Inversión Segura'],
+    specs: {
+      surface: '800 m²',
+      landUse: 'Comercial',
+      services: '100% Factibilidad',
+      topography: 'Plano Regular'
+    },
+    highlights: [
+      '20 metros de frente sobre avenida principal de alto tráfico comercial',
+      'Uso de suelo comercial de alto impacto con factibilidad municipal',
+      'Estudio de títulos realizado y certificado de gravámenes actualizado',
+      'Negociación directa y transparente con Inmo Astudillo'
+    ],
+    legalCertified: true,
+    featured: false
   }
 ];
 
@@ -186,23 +311,23 @@ export const LEGAL_SERVICES = [
 
 export const TESTIMONIALS = [
   {
-    quote: 'Vendieron mi departamento en Salamanca en solo 3 semanas y al precio que habíamos acordado en la tasación. La gestión documental fue impecable.',
-    author: 'Carlos Gómez del Prado',
-    role: 'Vendedor en Madrid / Residencial',
+    quote: 'Vendieron nuestra casa en el Barrio Obrero de Puyo en solo 3 semanas y al precio justo del avalúo pericial. La gestión notarial y el pago fueron 100% seguros y transparentes.',
+    author: 'Lic. Marco Vinicio Paredes',
+    role: 'Vendedor en Puyo / Residencial',
     rating: 5,
     tag: 'Venta Rápida'
   },
   {
-    quote: 'Como compradores primerizos estábamos desorientados con la hipoteca y el papeleo. El equipo de Astudillo nos acompañó paso a paso con una calidez inmensa.',
-    author: 'Laura Méndez & Javier',
-    role: 'Compradores en Retiro / Primera Vivienda',
+    quote: 'Compramos nuestro primer lote en Pastaza con asesoría de Inmo Astudillo. Nos revisaron el certificado de gravámenes y la planimetría para evitar problemas. Excelente respaldo legal.',
+    author: 'Fam. Barahona Viteri',
+    role: 'Compradores en Puyo / Lote Urbano',
     rating: 5,
     tag: 'Acompañamiento Notarial'
   },
   {
-    quote: 'Invierto recurrentemente en activos residenciales. Su capacidad para detectar propiedades con potencial y el análisis de rentabilidad no tienen comparación.',
-    author: 'Rodrigo A. Santillán',
-    role: 'Inversor Inmobiliario',
+    quote: 'Invierto frecuentemente en terrenos y propiedades en la Amazonía. La honestidad del Cbr. Daniel Astudillo y su conocimiento notarial hacen que cada compra sea una inversión segura.',
+    author: 'Ing. Rodrigo Santillán',
+    role: 'Inversionista Inmobiliario en Pastaza',
     rating: 5,
     tag: 'Inversión Patrimonial'
   }

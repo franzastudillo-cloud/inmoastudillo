@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '../types';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface EditPropertyModalProps {
   isOpen: boolean;
@@ -48,19 +49,17 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     );
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen no debe superar los 5MB para un óptimo rendimiento.');
-        return;
+      try {
+        const compressedBase64 = await compressImageFile(file, 1200, 0.82);
+        if (compressedBase64) {
+          setFormData((prev) => (prev ? { ...prev, imageUrl: compressedBase64 } : null));
+        }
+      } catch (err) {
+        console.error('Error compressing image:', err);
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        setFormData((prev) => (prev ? { ...prev, imageUrl: base64 } : null));
-      };
-      reader.readAsDataURL(file);
     }
   };
 

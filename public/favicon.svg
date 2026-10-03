@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#003816" />
+      <stop offset="50%" stop-color="#004d1f" />
+      <stop offset="100%" stop-color="#01240e" />
+    </linearGradient>
+    <linearGradient id="favGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+    <linearGradient id="favEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Emerald Rounded Background Container -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#favBg)" stroke="url(#favGold)" stroke-width="2" />
+
+  <!-- Inner Architectural 'A' and Roof -->
+  <g transform="translate(32, 34) scale(0.18) translate(-300, -200)">
+    <!-- Right leg of A -->
+    <path d="M 300 35 L 420 270 L 365 270 L 330 200 L 300 135 Z" fill="url(#favGold)" />
+    <!-- Left leg of A -->
+    <path d="M 300 35 L 180 270 L 235 270 L 270 200 L 300 135 Z" fill="#ffffff" />
+    
+    <!-- House Roof Peak inside A -->
+    <polygon points="300,120 335,165 265,165" fill="url(#favGold)" />
+    
+    <!-- 4-Pane Window in Warm Amber / Emerald -->
+    <rect x="286" y="176" width="11" height="11" rx="1.5" fill="#fef08a" />
+    <rect x="303" y="176" width="11" height="11" rx="1.5" fill="#fef08a" />
+    <rect x="286" y="192" width="11" height="11" rx="1.5" fill="#fef08a" />
+    <rect x="303" y="192" width="11" height="11" rx="1.5" fill="#fef08a" />
+
+    <!-- Notarial Legal Leaf Swoosh -->
+    <path d="M 190 270 C 240 230 280 210 320 208 C 365 205 395 190 420 140 C 400 165 370 185 320 188 C 280 190 235 215 190 270 Z" fill="url(#favEmerald)" />
+  </g>
+
+  <!-- Bottom Gold Dot / Notarial Seal -->
+  <circle cx="32" cy="55" r="2.5" fill="url(#favGold)" />
+</svg>

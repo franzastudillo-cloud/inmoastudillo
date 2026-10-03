@@ -7,6 +7,8 @@ interface PropertyCardProps {
   onScheduleVisit: (property: Property) => void;
   onChangeImage?: (property: Property) => void;
   onEditProperty?: (property: Property) => void;
+  onDeleteProperty?: (property: Property) => void;
+  rankBadge?: string;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -15,6 +17,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onScheduleVisit,
   onChangeImage,
   onEditProperty,
+  onDeleteProperty,
+  rankBadge,
 }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -69,8 +73,18 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/20 pointer-events-none" />
 
+        {/* Rank Badge if in Top 3 Highest-Value */}
+        {rankBadge && (
+          <div className="absolute top-3.5 left-3.5 z-20">
+            <span className="px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 text-slate-950 shadow-lg border border-amber-200 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[15px] fill-1 text-slate-950">workspace_premium</span>
+              <span>{rankBadge}</span>
+            </span>
+          </div>
+        )}
+
         {/* Dynamic Colorful Badges */}
-        <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5 items-center z-10 max-w-[70%]">
+        <div className={`absolute top-3.5 ${rankBadge ? 'left-36' : 'left-3.5'} flex flex-wrap gap-1.5 items-center z-10 max-w-[65%]`}>
           {property.badges.map((badge, idx) => (
             <span
               key={idx}
@@ -110,6 +124,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               title="Cambiar foto de este inmueble"
             >
               <span className="material-symbols-outlined text-[15px]">photo_camera</span>
+            </button>
+          )}
+
+          {onDeleteProperty && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteProperty(property);
+              }}
+              className="p-1.5 rounded-full bg-rose-600/90 hover:bg-rose-700 text-white flex items-center justify-center text-xs font-bold transition-all shadow-md cursor-pointer border border-white/30 backdrop-blur-sm"
+              title="Eliminar este inmueble"
+            >
+              <span className="material-symbols-outlined text-[15px]">delete</span>
             </button>
           )}
         </div>
@@ -262,6 +289,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             >
               <span className="material-symbols-outlined text-[16px] text-amber-700">edit_note</span>
               <span>Editar</span>
+            </button>
+          )}
+
+          {onDeleteProperty && (
+            <button
+              onClick={() => onDeleteProperty(property)}
+              className="p-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors flex items-center justify-center cursor-pointer shadow-xs"
+              title="Eliminar este inmueble"
+              aria-label="Eliminar propiedad"
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
             </button>
           )}
 

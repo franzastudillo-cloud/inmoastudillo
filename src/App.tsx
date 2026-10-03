@@ -12,11 +12,19 @@ import { PhotoSecurityGuideModal } from './components/PhotoSecurityGuideModal';
 import { EditPropertyModal } from './components/EditPropertyModal';
 import { SellerWelcomeModal } from './components/SellerWelcomeModal';
 import { AdminSecurityModal } from './components/AdminSecurityModal';
+import { ExportCatalogModal } from './components/ExportCatalogModal';
+import { SocialBannerModal } from './components/SocialBannerModal';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
+import { INITIAL_SOCIAL_BANNERS } from './data/socialBannersData';
+import { SocialBanner } from './types';
 import { HomeView } from './views/HomeView';
 import { PortfolioView } from './views/PortfolioView';
 import { ConveyancingView } from './views/ConveyancingView';
 import { ContactView } from './views/ContactView';
+
+// Versioning key to automatically purge legacy cache and load new properties
+const CATALOG_SCHEMA_VERSION = '2026.10_puyo_cumanda_v5';
 
 export default function App() {
   // Open directly on 'inicio' (Página de Inicio) by default
@@ -30,16 +38,40 @@ export default function App() {
     return 'inicio';
   });
   
-  // Properties with localStorage persistence
+  // Properties with robust localStorage persistence: user created properties are ALWAYS preserved
   const [properties, setProperties] = useState<Property[]>(() => {
     try {
       const saved = localStorage.getItem('inmo_astudillo_properties');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Check that it doesn't contain obsolete Madrid/Chamberí mock data
+          const hasLegacy = parsed.some((p: Property) =>
+            p.location?.includes('Chamberí') ||
+            p.location?.includes('Moraleja') ||
+            p.locationZone?.includes('Chamberí') ||
+            p.locationZone?.includes('Moraleja')
+          );
+          if (!hasLegacy) {
+            return parsed;
+          }
+        }
+      }
     } catch (e) {
-      console.error('Error loading saved properties:', e);
+      console.error('Error reading saved properties:', e);
     }
     return PROPERTIES_DATA;
   });
+
+  // Automatically save properties to localStorage whenever updated
+  useEffect(() => {
+    try {
+      localStorage.setItem('inmo_astudillo_properties', JSON.stringify(properties));
+      localStorage.setItem('inmo_astudillo_catalog_version', CATALOG_SCHEMA_VERSION);
+    } catch (e) {
+      console.error('Error auto-syncing properties:', e);
+    }
+  }, [properties]);
 
   // Admin Mode state: defaults to false (PROTECTED) so that on the public network (Cloudflare, etc.) the site cannot be edited without authorization
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
@@ -62,6 +94,133 @@ export default function App() {
   const [isSeoStrategyOpen, setIsSeoStrategyOpen] = useState(false);
   const [isPhotoSecurityOpen, setIsPhotoSecurityOpen] = useState(false);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
+  const [isExportCatalogOpen, setIsExportCatalogOpen] = useState(false);
+
+  // Social Property Banners state (Facebook & Instagram) with localStorage persistence
+  const [socialBanners, setSocialBanners] = useState<SocialBanner[]>(() => {
+    try {
+      const saved = localStorage.getItem('inmo_astudillo_social_banners');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Strictly user-created banners - no preconfigured dummy banners
+          const userOnly = parsed.filter(b => !['banner-cumanda-fb', 'banner-esquinero-fb', 'banner-fatima-ig'].includes(b.id));
+          return userOnly;
+        }
+      }
+    } catch (e) {
+      console.error('Error loading social banners:', e);
+    }
+    return [];
+  });
+
+  const [isSocialBannerModalOpen, setIsSocialBannerModalOpen] = useState(false);
+  const [editingSocialBanner, setEditingSocialBanner] = useState<SocialBanner | null>(null);
+
+  const handleSaveSocialBanner = (banner: SocialBanner, alsoAddToCatalog: boolean = true) => {
+    // 1. Update social banners
+    setSocialBanners((prev) => {
+      const exists = prev.some((b) => b.id === banner.id);
+      const updated = exists ? prev.map((b) => (b.id === banner.id ? banner : b)) : [banner, ...prev];
+      try {
+        localStorage.setItem('inmo_astudillo_social_banners', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving social banners:', e);
+      }
+      return updated;
+    });
+
+    // 2. Also register as a real Property in the main catalog
+    if (alsoAddToCatalog) {
+      setProperties((prev) => {
+        const existingIndex = prev.findIndex((p) => p.title.toLowerCase().trim() === banner.title.toLowerCase().trim());
+        const numericPrice = banner.price || (banner.priceFormatted ? parseInt(banner.priceFormatted.replace(/\D/g, '')) || 95000 : 95000);
+        const newProperty: Property = {
+          id: existingIndex >= 0 ? prev[existingIndex].id : Date.now(),
+          title: banner.title,
+          category: banner.title.toLowerCase().includes('terreno') || banner.title.toLowerCase().includes('lote') ? 'land' : 'residential',
+          price: numericPrice,
+          priceFormatted: banner.priceFormatted || `$${numericPrice.toLocaleString('en-US')} USD`,
+          priceLabel: 'Venta Directa',
+          location: banner.location || 'Puyo, Pastaza',
+          locationZone: banner.locationZone || 'Puyo',
+          address: banner.location || 'Puyo, Pastaza',
+          shortDescription: banner.description || banner.title,
+          description: (banner.description || banner.title) + ` Publicación oficial en ${banner.platform === 'facebook' ? 'Facebook' : 'Instagram'}: ${banner.postUrl}`,
+          imageUrl: banner.imageUrl,
+          fallbackGradient: 'from-emerald-950 via-slate-900 to-teal-950',
+          photoCount: 1,
+          badges: ['Publicación ' + (banner.platform === 'facebook' ? 'Facebook' : 'Instagram'), 'En Venta'],
+          specs: {
+            surface: banner.surface || 'Consultar m²',
+            rooms: banner.rooms,
+            bathrooms: banner.bathrooms,
+            parking: banner.parking
+          },
+          highlights: [
+            banner.description || banner.title,
+            'Estudio de títulos y blindaje notarial en Pastaza',
+            'Enlace directo a la publicación en redes: ' + banner.postUrl
+          ],
+          legalCertified: true,
+          featured: true
+        };
+
+        let updatedProps: Property[];
+        if (existingIndex >= 0) {
+          updatedProps = [...prev];
+          updatedProps[existingIndex] = newProperty;
+        } else {
+          updatedProps = [newProperty, ...prev];
+        }
+
+        try {
+          localStorage.setItem('inmo_astudillo_properties', JSON.stringify(updatedProps));
+        } catch (e) {
+          console.error(e);
+        }
+        return updatedProps;
+      });
+    }
+  };
+
+  const handleDeleteSocialBanner = (bannerId: string) => {
+    // Find banner to check title
+    const bannerToDelete = socialBanners.find((b) => b.id === bannerId);
+
+    // 1. Remove from banners
+    setSocialBanners((prev) => {
+      const updated = prev.filter((b) => b.id !== bannerId);
+      try {
+        localStorage.setItem('inmo_astudillo_social_banners', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error deleting social banner:', e);
+      }
+      return updated;
+    });
+
+    // 2. Also remove matching property from properties catalog if created
+    if (bannerToDelete) {
+      setProperties((prev) => {
+        const updated = prev.filter((p) => p.title.toLowerCase().trim() !== bannerToDelete.title.toLowerCase().trim());
+        try {
+          localStorage.setItem('inmo_astudillo_properties', JSON.stringify(updated));
+        } catch (e) {
+          console.error(e);
+        }
+        return updated;
+      });
+    }
+  };
+
+  const handleResetSocialBanners = () => {
+    try {
+      localStorage.setItem('inmo_astudillo_social_banners', JSON.stringify(INITIAL_SOCIAL_BANNERS));
+    } catch (e) {
+      console.error(e);
+    }
+    setSocialBanners(INITIAL_SOCIAL_BANNERS);
+  };
 
   // Floating welcome modal for sellers: opens automatically upon entry after 1.8s
   useEffect(() => {
@@ -112,11 +271,12 @@ export default function App() {
     }
   };
 
-  // Reset properties to factory defaults
+  // Reset properties to official Puyo Pastaza catalog
   const handleResetProperties = () => {
-    if (window.confirm('¿Deseas restablecer las fotos y datos originales de las propiedades?')) {
+    if (window.confirm('¿Deseas restablecer el catálogo oficial de Puyo y Pastaza con sus datos y fotos certificadas?')) {
       try {
-        localStorage.removeItem('inmo_astudillo_properties');
+        localStorage.setItem('inmo_astudillo_catalog_version', CATALOG_SCHEMA_VERSION);
+        localStorage.setItem('inmo_astudillo_properties', JSON.stringify(PROPERTIES_DATA));
       } catch (e) {
         console.error(e);
       }
@@ -151,6 +311,7 @@ export default function App() {
         item.id === propertyId ? { ...item, imageUrl: newImageUrl } : item
       );
       try {
+        localStorage.setItem('inmo_astudillo_catalog_version', CATALOG_SCHEMA_VERSION);
         localStorage.setItem('inmo_astudillo_properties', JSON.stringify(updated));
       } catch (e) {
         console.error('Error saving properties to localStorage:', e);
@@ -167,6 +328,7 @@ export default function App() {
         ? prev.map((item) => (item.id === updatedProperty.id ? updatedProperty : item))
         : [updatedProperty, ...prev];
       try {
+        localStorage.setItem('inmo_astudillo_catalog_version', CATALOG_SCHEMA_VERSION);
         localStorage.setItem('inmo_astudillo_properties', JSON.stringify(updated));
       } catch (e) {
         console.error('Error saving properties to localStorage:', e);
@@ -211,6 +373,42 @@ export default function App() {
     setEditingProperty(newProperty);
   };
 
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleRequestDeleteProperty = (property: Property) => {
+    setPropertyToDelete(property);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = (property: Property) => {
+    setProperties((prev) => {
+      const updated = prev.filter((p) => p.id !== property.id);
+      try {
+        localStorage.setItem('inmo_astudillo_properties', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving properties after delete:', e);
+      }
+      return updated;
+    });
+
+    // Also remove from social banners if matching
+    setSocialBanners((prev) => {
+      const updated = prev.filter(
+        (b) => b.title.toLowerCase().trim() !== property.title.toLowerCase().trim()
+      );
+      try {
+        localStorage.setItem('inmo_astudillo_social_banners', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+
+    setPropertyToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f8faf7] text-[#191c1b] selection:bg-[#caead8] selection:text-[#004215]">
       {/* Navigation Header */}
@@ -232,11 +430,23 @@ export default function App() {
             isAdmin={isAdmin}
             onChangePropertyImage={(prop) => setImageEditProperty(prop)}
             onEditProperty={(prop) => setEditingProperty(prop)}
+            onDeleteProperty={handleRequestDeleteProperty}
             onAddNewProperty={handleAddNewProperty}
             onQuickView={handleOpenQuickView}
             onScheduleVisit={handleScheduleVisit}
             onNavigate={handleNavigate}
             onOpenValuation={() => setIsValuationOpen(true)}
+            socialBanners={socialBanners}
+            onOpenAddSocialBanner={() => {
+              setEditingSocialBanner(null);
+              setIsSocialBannerModalOpen(true);
+            }}
+            onEditSocialBanner={(banner) => {
+              setEditingSocialBanner(banner);
+              setIsSocialBannerModalOpen(true);
+            }}
+            onDeleteSocialBanner={handleDeleteSocialBanner}
+            onResetSocialBanners={handleResetSocialBanners}
           />
         )}
 
@@ -253,7 +463,9 @@ export default function App() {
             onNavigate={handleNavigate}
             onChangePropertyImage={(prop) => setImageEditProperty(prop)}
             onEditProperty={(prop) => setEditingProperty(prop)}
+            onDeleteProperty={handleRequestDeleteProperty}
             onAddNewProperty={handleAddNewProperty}
+            onOpenExportCatalog={() => setIsExportCatalogOpen(true)}
           />
         )}
 
@@ -331,6 +543,36 @@ export default function App() {
         isOpen={isAdminAuthOpen}
         onClose={() => setIsAdminAuthOpen(false)}
         onSuccess={handleAdminAuthSuccess}
+      />
+
+      {/* Export & GitHub Sync Modal */}
+      <ExportCatalogModal
+        isOpen={isExportCatalogOpen}
+        onClose={() => setIsExportCatalogOpen(false)}
+        properties={properties}
+        onResetOfficial={handleResetProperties}
+      />
+
+      {/* Social Property Banner Modal (Facebook & Instagram) */}
+      <SocialBannerModal
+        isOpen={isSocialBannerModalOpen}
+        onClose={() => {
+          setIsSocialBannerModalOpen(false);
+          setEditingSocialBanner(null);
+        }}
+        onSaveBanner={handleSaveSocialBanner}
+        bannerToEdit={editingSocialBanner}
+      />
+
+      {/* Delete Confirmation In-App Modal */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        property={propertyToDelete}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setPropertyToDelete(null);
+        }}
+        onConfirmDelete={handleConfirmDelete}
       />
 
       {/* Floating Launcher Pill: ¿Quieres vender tu propiedad? */}

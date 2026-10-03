@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Property } from '../types';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface ChangeImageModalProps {
   isOpen: boolean;
@@ -41,16 +42,18 @@ export const ChangeImageModal: React.FC<ChangeImageModalProps> = ({
   ];
 
   // Handle local file selection from computer
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImageUrl(result);
-        setPreviewUrl(result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImageFile(file, 1200, 0.82);
+        if (compressed) {
+          setImageUrl(compressed);
+          setPreviewUrl(compressed);
+        }
+      } catch (err) {
+        console.error('Error compressing image:', err);
+      }
     }
   };
 

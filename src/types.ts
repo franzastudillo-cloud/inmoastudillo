@@ -31,3 +31,23 @@ export interface Property {
 }
 
 export type ViewType = 'inicio' | 'propiedades' | 'tramites' | 'contacto';
+
+export interface SocialBanner {
+  id: string;
+  platform: 'facebook' | 'instagram' | 'tiktok';
+  postUrl: string;
+  title: string;
+  priceFormatted: string;
+  price?: number;
+  location: string;
+  locationZone?: string;
+  imageUrl: string;
+  description: string;
+  badge?: string;
+  surface?: string;
+  rooms?: string;
+  bathrooms?: string;
+  parking?: string;
+  propertyId?: number;
+  dateAdded?: string;
+}

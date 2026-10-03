@@ -6,16 +6,18 @@ import { PropertyCard } from '../components/PropertyCard';
 interface PortfolioViewProps {
   onQuickView: (property: Property) => void;
   onScheduleVisit: (property: Property) => void;
-  onOpenAppointmentModal: () => void;
+  onOpenAppointmentModal?: () => void;
   onNavigate: (view: ViewType) => void;
   properties?: Property[];
   onChangePropertyImage?: (property: Property) => void;
   onEditProperty?: (property: Property) => void;
+  onDeleteProperty?: (property: Property) => void;
   onAddNewProperty?: () => void;
   isAdmin?: boolean;
   onToggleAdmin?: () => void;
   onOpenPhotoSecurityModal?: () => void;
   onResetProperties?: () => void;
+  onOpenExportCatalog?: () => void;
 }
 
 export const PortfolioView: React.FC<PortfolioViewProps> = ({
@@ -26,11 +28,13 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
   properties = PROPERTIES_DATA,
   onChangePropertyImage,
   onEditProperty,
+  onDeleteProperty,
   onAddNewProperty,
   isAdmin = false,
   onToggleAdmin,
   onOpenPhotoSecurityModal,
   onResetProperties,
+  onOpenExportCatalog,
 }) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
@@ -431,6 +435,17 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                   <span>Agregar Inmueble</span>
                 </button>
               )}
+              {onOpenExportCatalog && (
+                <button
+                  type="button"
+                  onClick={onOpenExportCatalog}
+                  className="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-stone-950 text-xs font-black transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 border border-amber-300"
+                  title="Sincronizar y exportar catálogo para GitHub y Cloudflare"
+                >
+                  <span className="material-symbols-outlined text-[16px]">cloud_sync</span>
+                  <span>Sincronizar con GitHub</span>
+                </button>
+              )}
               {onResetProperties && (
                 <button
                   type="button"
@@ -484,6 +499,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                 onScheduleVisit={onScheduleVisit}
                 onChangeImage={isAdmin ? onChangePropertyImage : undefined}
                 onEditProperty={isAdmin ? onEditProperty : undefined}
+                onDeleteProperty={isAdmin ? onDeleteProperty : undefined}
               />
             ))}
           </div>

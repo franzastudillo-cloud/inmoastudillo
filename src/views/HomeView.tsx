@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Property, ViewType } from '../types';
+import { Property, ViewType, SocialBanner } from '../types';
 import { PROPERTIES_DATA } from '../data/propertiesData';
 import { PropertyCard } from '../components/PropertyCard';
+import { SocialPropertyBanners } from '../components/SocialPropertyBanners';
 import securityPortraitImg from '../assets/images/regenerated_image_1790984978475.jpg';
 
 interface HomeViewProps {
@@ -13,7 +14,13 @@ interface HomeViewProps {
   isAdmin?: boolean;
   onChangePropertyImage?: (property: Property) => void;
   onEditProperty?: (property: Property) => void;
+  onDeleteProperty?: (property: Property) => void;
   onAddNewProperty?: () => void;
+  socialBanners?: SocialBanner[];
+  onOpenAddSocialBanner?: () => void;
+  onEditSocialBanner?: (banner: SocialBanner) => void;
+  onDeleteSocialBanner?: (bannerId: string) => void;
+  onResetSocialBanners?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -25,7 +32,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
   isAdmin = false,
   onChangePropertyImage,
   onEditProperty,
+  onDeleteProperty,
   onAddNewProperty,
+  socialBanners = [],
+  onOpenAddSocialBanner,
+  onEditSocialBanner,
+  onDeleteSocialBanner,
+  onResetSocialBanners,
 }) => {
   // Search Bar State
   const [searchIntent, setSearchIntent] = useState<'comprar' | 'alquilar' | 'proyectos'>('comprar');
@@ -240,115 +253,114 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* 3. PORTAFOLIO SELECCIONADO (FEATURED SECTION) */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16 w-full">
-        {/* Section Header with Category Tabs */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      {/* 3. COLECCIÓN EXCLUSIVA: LAS 3 PROPIEDADES DE MAYOR VALOR */}
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-18 w-full">
+        {/* Luxury Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b border-emerald-950/10">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#326b00] uppercase tracking-wider mb-1">
-              <span className="material-symbols-outlined text-[16px]">domain</span>
-              <span>Portafolio Seleccionado</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-emerald-600/15 to-amber-500/15 border border-amber-400/40 text-xs font-black tracking-wider uppercase text-amber-900 mb-2.5 shadow-xs">
+              <span className="material-symbols-outlined text-[16px] text-amber-600 fill-1">workspace_premium</span>
+              <span>Colección Exclusiva · Mayor Valor & Plusvalía en Pastaza</span>
             </div>
-            <h2 className="text-3xl font-extrabold text-[#004215] tracking-tight">
-              Propiedades Exclusivas
+            <h2 className="text-3xl sm:text-4xl font-black text-[#003816] tracking-tight">
+              Inmuebles Destacados de Mayor Inversión
             </h2>
-            <p className="text-xs md:text-sm text-[#41493f] mt-1 max-w-xl">
-              Inmuebles cuidadosamente verificados con garantía legal, excelente rentabilidad y acabados de primera categoría.
+            <p className="text-xs sm:text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
+              Descubre las 3 propiedades de mayor cotización de nuestro catálogo oficial en Puyo. Títulos de propiedad saneados ante Notaría y Registro de la Propiedad, acabados de primera y alta plusvalía.
             </p>
           </div>
 
-          <button
-            onClick={() => onNavigate('propiedades')}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#004215] hover:text-[#326b00] transition-colors cursor-pointer group"
-          >
-            <span>Ver Catálogo Completo</span>
-            <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
-              arrow_forward
-            </span>
-          </button>
-        </div>
+          {/* Quick Header CTA to view full catalog & Admin Actions */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {isAdmin && onOpenAddSocialBanner && (
+              <button
+                type="button"
+                onClick={onOpenAddSocialBanner}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-800 to-teal-900 hover:from-emerald-700 hover:to-teal-800 text-amber-300 font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                title="Pega un enlace de Facebook o Instagram para extraer datos y crear el inmueble automáticamente"
+              >
+                <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+                <span>+ Crear con Link de Facebook / IA</span>
+              </button>
+            )}
 
-        {/* Home category filter chips */}
-        <div className="flex flex-wrap items-center gap-2.5 mb-8">
-          <button
-            onClick={() => setHomeCategory('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
-              homeCategory === 'all'
-                ? 'bg-gradient-to-r from-stone-900 to-emerald-950 text-amber-300 shadow-md'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            Todos los Inmuebles ({PROPERTIES_DATA.length})
-          </button>
-          <button
-            onClick={() => setHomeCategory('residential')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
-              homeCategory === 'residential'
-                ? 'bg-gradient-to-r from-emerald-700 to-teal-800 text-white shadow-md shadow-emerald-900/15'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            🏡 Casas y Departamentos
-          </button>
-          <button
-            onClick={() => setHomeCategory('land')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
-              homeCategory === 'land'
-                ? 'bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md shadow-sky-900/15'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            🌄 Terrenos y Lotes
-          </button>
-        </div>
-
-        {/* Admin Callout: Full Editing Enabled */}
-        {isAdmin && (
-          <div className="mb-6 p-4.5 rounded-2xl bg-gradient-to-r from-amber-50 via-emerald-50 to-amber-50 border-2 border-amber-300 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-slate-800 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-sm">
-                <span className="material-symbols-outlined text-[20px]">edit_document</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-stone-900">
-                    Modo Edición Total para Administrador
-                  </span>
-                  <span className="text-[10px] uppercase font-extrabold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
-                    Activo
-                  </span>
-                </div>
-                <p className="text-slate-600 mt-0.5 leading-relaxed">
-                  Ya puedes editar <b>textos, precios en USD, habitaciones, baños, metros cuadrados (m²)</b> y fotografías. Haz clic en el botón <b>«Editar»</b> sobre cualquier inmueble.
-                </p>
-              </div>
-            </div>
-
-            {onAddNewProperty && (
+            {isAdmin && onAddNewProperty && (
               <button
                 type="button"
                 onClick={onAddNewProperty}
-                className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 transition-all shadow-md shadow-amber-900/15 cursor-pointer active:scale-95"
+                className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
               >
-                <span className="material-symbols-outlined text-[16px]">add_circle</span>
-                <span>Agregar Propiedad</span>
+                <span className="material-symbols-outlined text-[17px]">add_circle</span>
+                <span>Manual</span>
               </button>
             )}
-          </div>
-        )}
 
-        {/* 3 Grid Property Cards */}
+            <button
+              type="button"
+              onClick={() => onNavigate('propiedades')}
+              className="px-5 py-2.5 rounded-xl bg-[#003816] hover:bg-[#004d1e] text-amber-300 font-extrabold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer group active:scale-95"
+            >
+              <span>Ver Catálogo Completo ({properties.length})</span>
+              <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
+                arrow_forward
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Grid of the 3 Most Expensive Properties (Las 3 más caras) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredFeatured.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              onQuickView={onQuickView}
-              onScheduleVisit={onScheduleVisit}
-              onChangeImage={isAdmin ? onChangePropertyImage : undefined}
-              onEditProperty={isAdmin ? onEditProperty : undefined}
-            />
-          ))}
+          {[...properties]
+            .sort((a, b) => (b.price || 0) - (a.price || 0))
+            .slice(0, 3)
+            .map((property, idx) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                rankBadge={`#${idx + 1} Mayor Valor`}
+                onQuickView={onQuickView}
+                onScheduleVisit={onScheduleVisit}
+                onChangeImage={isAdmin ? onChangePropertyImage : undefined}
+                onEditProperty={isAdmin ? onEditProperty : undefined}
+                onDeleteProperty={isAdmin ? onDeleteProperty : undefined}
+              />
+            ))}
+        </div>
+
+        {/* Elegant Bottom Redirection Banner to the full catalog */}
+        <div className="mt-12 bg-gradient-to-r from-emerald-950 via-[#003816] to-teal-950 rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_-15px_rgba(0,56,22,0.4)] border border-amber-300/30 relative overflow-hidden">
+          {/* Subtle ambient lighting */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0 text-amber-300 shadow-inner">
+              <span className="material-symbols-outlined text-[30px]">travel_explore</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-300">
+                  Portafolio Inmobiliario Completo
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-extrabold text-white">
+                ¿Buscas más opciones de casas, quintas o terrenos en Puyo?
+              </h3>
+              <p className="text-xs sm:text-sm text-emerald-100/80 mt-0.5 max-w-xl">
+                Explora todo nuestro inventario con filtros por rango de precio, ubicación y tipo de suelo. Te asesoramos en cada etapa de la compraventa.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('propiedades')}
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:from-amber-300 hover:to-amber-200 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-900/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer shrink-0 flex items-center gap-2 relative z-10"
+          >
+            <span>Explorar Todas las Propiedades ({properties.length})</span>
+            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
         </div>
       </section>
 
