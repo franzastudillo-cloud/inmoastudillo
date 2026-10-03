@@ -59,26 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Avalúo Comercial Gratuito
             </button>
-            {onToggleAdmin && (
-              <button
-                onClick={onToggleAdmin}
-                className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
-                  isAdmin
-                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-stone-900 font-extrabold shadow-sm'
-                    : 'bg-emerald-950/90 text-emerald-300 hover:text-white hover:bg-emerald-900 border border-emerald-400/50 shadow-xs'
-                }`}
-                title={
-                  isAdmin
-                    ? 'Modo Administrador activado. Clic para BLOQUEAR y proteger contra cambios desde la red.'
-                    : 'Modo Protegido en la Red activado. Nadie puede modificar la web sin tu clave de administrador.'
-                }
-              >
-                <span className="material-symbols-outlined text-[13px]">
-                  {isAdmin ? 'lock_open' : 'lock'}
-                </span>
-                <span>{isAdmin ? 'Edición Habilitada (Bloquear)' : 'Protegido en la Red'}</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -128,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs px-4.5 py-2.5 rounded-xl transition-all shadow-md shadow-[#25D366]/25 hover:shadow-lg hover:shadow-[#25D366]/35 whitespace-nowrap cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">chat</span>
-              <span className="hidden sm:inline">0994773533</span>
+              <span className="hidden sm:inline">+593 994773533</span>
             </a>
 
             {/* Mobile Menu Toggle Button */}
@@ -181,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="w-full text-center py-2.5 rounded-xl bg-[#25D366] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
               >
                 <span className="material-symbols-outlined text-[16px]">chat</span>
-                WhatsApp Directo: 0994773533
+                WhatsApp Directo: +593 994773533
               </a>
             </div>
           </div>

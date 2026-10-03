@@ -234,17 +234,21 @@ export const Footer: React.FC<FooterProps> = ({
             {onToggleAdmin && (
               <button
                 onClick={onToggleAdmin}
-                className={`inline-flex items-center gap-1 font-bold transition-colors cursor-pointer px-3 py-1 rounded-lg border shadow-xs ${
+                className={`inline-flex items-center gap-1.5 transition-colors cursor-pointer text-xs ${
                   isAdmin
-                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-stone-900 border-amber-300'
-                    : 'bg-white text-slate-700 hover:text-emerald-700 border-slate-200'
+                    ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 px-2.5 py-1 rounded-md font-bold'
+                    : 'text-slate-400 hover:text-slate-700 hover:underline px-1 py-0.5'
                 }`}
-                title="Acceso para el propietario / administrador"
+                title={
+                  isAdmin
+                    ? 'Edición habilitada. Clic para bloquear y proteger el sitio en la red.'
+                    : 'Acceso privado para el administrador'
+                }
               >
                 <span className="material-symbols-outlined text-[14px]">
                   {isAdmin ? 'lock_open' : 'lock'}
                 </span>
-                <span>{isAdmin ? 'Edición Habilitada (Bloquear)' : 'Protegido en la Red'}</span>
+                <span>{isAdmin ? 'Modo Editor Activo (Bloquear)' : 'Administración'}</span>
               </button>
             )}
             {onOpenSeoStrategy && (

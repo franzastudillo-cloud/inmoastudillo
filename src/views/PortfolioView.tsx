@@ -181,7 +181,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                     Atención Preferente Inmediata
                   </span>
                   <span className="text-xl font-extrabold tracking-tight text-white tabular-nums">
-                    0994773533
+                    +593 994773533
                   </span>
                 </div>
                 <a
@@ -383,29 +383,6 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
               >
                 <span className="material-symbols-outlined text-[17px] text-[#326b00]">shield</span>
                 <span>¿Quién puede cambiar fotos?</span>
-              </button>
-            )}
-
-            {/* Admin Mode Toggle */}
-            {onToggleAdmin && (
-              <button
-                type="button"
-                onClick={onToggleAdmin}
-                className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ${
-                  isAdmin
-                    ? 'bg-amber-400 text-stone-900 border border-amber-300 font-extrabold shadow-sm'
-                    : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-                }`}
-                title={
-                  isAdmin
-                    ? 'Modo Administrador activado. Clic para BLOQUEAR y proteger contra cambios.'
-                    : 'Sitio protegido contra modificaciones en la red. Clic para desbloquear con tu clave.'
-                }
-              >
-                <span className="material-symbols-outlined text-[17px]">
-                  {isAdmin ? 'lock_open' : 'lock'}
-                </span>
-                <span>{isAdmin ? 'Edición Habilitada (Bloquear)' : 'Protegido en la Red'}</span>
               </button>
             )}
 
@@ -633,7 +610,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                 target="_blank"
               >
                 <span className="material-symbols-outlined text-[20px]">chat</span>
-                <span>WhatsApp Directo: 0994773533</span>
+                <span>WhatsApp Directo: +593 994773533</span>
               </a>
 
               <button

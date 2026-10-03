@@ -19,7 +19,16 @@ import { ConveyancingView } from './views/ConveyancingView';
 import { ContactView } from './views/ContactView';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<ViewType>('propiedades'); // Default to portfolio as requested in user stitch snapshot
+  // Open directly on 'inicio' (Página de Inicio) by default
+  const [currentView, setCurrentView] = useState<ViewType>(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '') as ViewType;
+      if (['inicio', 'propiedades', 'tramites', 'contacto'].includes(hash)) {
+        return hash;
+      }
+    }
+    return 'inicio';
+  });
   
   // Properties with localStorage persistence
   const [properties, setProperties] = useState<Property[]>(() => {

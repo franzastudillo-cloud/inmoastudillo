@@ -70,7 +70,7 @@ export const ContactView: React.FC = () => {
                   <div>
                     <span className="font-bold text-[#191c1b] block">Línea Telefónica Directa</span>
                     <a href="tel:+593994773533" className="hover:text-[#004215] font-semibold">
-                      0994773533 / +593 994773533
+                      +593 994773533
                     </a>
                   </div>
                 </div>

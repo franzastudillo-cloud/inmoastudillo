@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CONVEYANCING_STEPS, LEGAL_SERVICES, FAQS } from '../data/propertiesData';
+import securityPortraitImg from '../assets/images/regenerated_image_1790984978475.jpg';
 
 interface ConveyancingViewProps {
   onOpenAppointmentModal: () => void;
@@ -29,35 +30,8 @@ export const ConveyancingView: React.FC<ConveyancingViewProps> = ({ onOpenAppoin
   const [propertyLocation, setPropertyLocation] = useState('Puyo / Pastaza / Quito');
   const [propertyNotes, setPropertyNotes] = useState('');
 
-  // Security banner image state (persisted in localStorage or default to inmoastudillo-puyo.jpg)
-  const [securityImg, setSecurityImg] = useState<string>(() => {
-    return localStorage.getItem('inmo_security_image') || '/inmoastudillo-puyo.jpg';
-  });
-  const securityFileInputRef = React.useRef<HTMLInputElement | null>(null);
-
-  const handleSecurityImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
-      setSecurityImg(dataUrl);
-      localStorage.setItem('inmo_security_image', dataUrl);
-      try {
-        await fetch('/api/upload-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            dataUrl,
-            filename: 'inmoastudillo-puyo.jpg',
-          }),
-        });
-      } catch (err) {
-        console.error('Failed to sync image to server:', err);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+  // Security banner image
+  const securityImg = '/inmoastudillo-puyo.jpg';
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Toggle checkmark in checklist
@@ -704,78 +678,29 @@ export const ConveyancingView: React.FC<ConveyancingViewProps> = ({ onOpenAppoin
 
           {/* Two-Column Security Showcase */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left: Professional Security Image */}
+            {/* Left: Professional Security Image (Exact match of inmoastudillo-puyo.jpg with Modern, Elegant, Non-modifiable effects) */}
             <div className="lg:col-span-5 relative">
-              <input
-                type="file"
-                ref={securityFileInputRef}
-                onChange={handleSecurityImageUpload}
-                accept="image/*"
-                className="hidden"
-              />
-              <div 
-                className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-slate-900 aspect-[4/3] sm:aspect-square lg:aspect-[4/3] group cursor-pointer"
-                onClick={() => securityFileInputRef.current?.click()}
-                title="Haz clic para seleccionar o actualizar la foto de seguridad (inmoastudillo-puyo.jpg)"
-              >
-                <img
-                  src={securityImg}
-                  alt="Firma y blindaje legal notarial en InmoAstudillo"
-                  className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('unsplash')) {
-                      target.src = 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1000&q=80';
-                    }
-                  }}
-                  referrerPolicy="no-referrer"
-                />
+              {/* Subtle ambient luxury aura glow */}
+              <div className="absolute -inset-2 bg-gradient-to-tr from-emerald-600/30 via-amber-400/20 to-teal-500/30 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-                {/* Direct Upload Button */}
-                <div className="absolute top-4 right-4 z-20">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      securityFileInputRef.current?.click();
-                    }}
-                    className="bg-black/75 hover:bg-emerald-900 text-white px-3 py-1.5 rounded-full text-[11px] font-bold shadow-lg backdrop-blur-md transition-all flex items-center gap-1.5 border border-white/20 hover:border-amber-300 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[15px] text-amber-300">photo_camera</span>
-                    <span>Cambiar / Subir Foto</span>
-                  </button>
-                </div>
+              {/* Obsidian Luxury Card Chassis */}
+              <div className="relative rounded-3xl p-2 bg-slate-950 border border-emerald-500/30 shadow-[0_25px_60px_rgba(0,40,15,0.3)] overflow-hidden group select-none">
+                {/* Golden/Emerald top edge light beam */}
+                <div className="absolute top-0 inset-x-8 h-[1.5px] bg-gradient-to-r from-transparent via-emerald-400/70 to-transparent pointer-events-none z-20" />
 
-                {/* Badges only shown if using external fallback without embedded badges */}
-                {!securityImg.startsWith('data:image') && !securityImg.includes('inmoastudillo') && (
-                  <>
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent pointer-events-none" />
-                    <div className="absolute top-4 left-4 flex items-center gap-1">
-                      <div className="bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-md text-[10px] font-extrabold text-emerald-900 flex items-center gap-1 border border-emerald-200">
-                        <span className="material-symbols-outlined text-[14px] text-emerald-600">shield</span>
-                        <span>100% Blindaje Legal</span>
-                      </div>
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg border border-slate-200 text-slate-900">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-[18px]">gavel</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-slate-900">Auditoría Registral Previa</span>
-                          <span className="text-[10px] text-slate-500 font-medium">Licencia Profesional Acbrp - 005</span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                <div className="relative rounded-[20px] overflow-hidden aspect-[4/5] sm:aspect-square lg:aspect-[4/5] bg-black">
+                  {/* Portrait of Broker in Navy Suit with Dark Studio Backdrop */}
+                  <img
+                    src={securityPortraitImg}
+                    alt="Cbr. Franz Daniel Astudillo - Firma y Blindaje Notarial en InmoAstudillo"
+                    className="w-full h-full object-cover object-top transition-all duration-700 ease-out group-hover:scale-[1.03] group-hover:contrast-[1.02]"
+                  />
 
-                {/* Hover instruction helper */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center pointer-events-none">
-                  <div className="bg-white/95 text-slate-900 px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 border border-emerald-100">
-                    <span className="material-symbols-outlined text-[18px] text-emerald-700">upload_file</span>
-                    <span>Seleccionar inmoastudillo-puyo.jpg</span>
-                  </div>
+                  {/* Elegant diagonal light sheen reflection on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.07] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+                  {/* Inner subtle metallic border */}
+                  <div className="absolute inset-0 ring-1 ring-inset ring-white/15 rounded-[20px] pointer-events-none shadow-[inset_0_0_30px_rgba(0,0,0,0.5)]" />
                 </div>
               </div>
             </div>
@@ -882,7 +807,7 @@ export const ConveyancingView: React.FC<ConveyancingViewProps> = ({ onOpenAppoin
               <div className="flex flex-col gap-2 text-xs text-[#41493f]">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px] text-[#004215]">phone_in_talk</span>
-                  <span>Línea Telefónica Directa: <b>0994773533</b></span>
+                  <span>Línea Telefónica Directa: <b>+593 994773533</b></span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px] text-[#004215]">handshake</span>
@@ -1078,7 +1003,7 @@ export const ConveyancingView: React.FC<ConveyancingViewProps> = ({ onOpenAppoin
             className="mt-2 py-3 px-6 rounded-lg bg-[#aaf773] hover:bg-[#8fda5a] text-[#0b2000] text-xs font-bold transition-all shadow-lg flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">chat</span>
-            <span>Contactar por WhatsApp: 0994773533</span>
+            <span>Contactar por WhatsApp: +593 994773533</span>
           </a>
         </div>
       </section>
