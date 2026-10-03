@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '../types';
-import { PROPERTIES_DATA } from '../data/propertiesData';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -21,11 +20,10 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
   useEffect(() => {
     if (selectedProperty) {
-      setPropertyTitle(`${selectedProperty.title} (${selectedProperty.priceFormatted})`);
+      const precioFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(selectedProperty.precio);
+      setPropertyTitle(`${selectedProperty.titulo} (${precioFmt} USD)`);
     } else {
-      setPropertyTitle(
-        `${PROPERTIES_DATA[0].title} (${PROPERTIES_DATA[0].priceFormatted})`
-      );
+      setPropertyTitle('Asesoría Inmobiliaria y Visita Presencial en Puyo');
     }
   }, [selectedProperty, isOpen]);
 
@@ -95,20 +93,15 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="text-[11px] font-bold text-[#41493f] uppercase tracking-wider block mb-1">
-                  Inmueble de Interés
+                  Inmueble o Trámite de Interés
                 </label>
-                <select
+                <input
+                  type="text"
                   value={propertyTitle}
                   onChange={(e) => setPropertyTitle(e.target.value)}
+                  placeholder="Ej: Casa en Barrio Cumandá, Asesoría Notarial..."
                   className="w-full bg-[#f2f4f1] border border-[#e1e3e0] rounded-lg p-2.5 text-xs text-[#191c1b] focus:outline-none focus:ring-2 focus:ring-[#326b00] font-medium"
-                >
-                  {PROPERTIES_DATA.map((p) => (
-                    <option key={p.id} value={`${p.title} (${p.priceFormatted})`}>
-                      {p.title} ({p.priceFormatted})
-                    </option>
-                  ))}
-                  <option value="Consulta General de Cartera">Otro requerimiento / Consulta de Cartera</option>
-                </select>
+                />
               </div>
 
               <div>

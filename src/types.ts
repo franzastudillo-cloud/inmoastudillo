@@ -1,53 +1,21 @@
-export type CategoryType = 'all' | 'residential' | 'land' | 'investment';
+export type CategoryType = 'all' | 'casa' | 'terreno' | 'departamento' | 'quinta';
 
 export interface Property {
-  id: number;
-  title: string;
-  category: 'residential' | 'land';
-  price: number;
-  priceFormatted: string;
-  priceLabel: string;
-  location: string;
-  locationZone: string;
-  address: string;
-  description: string;
-  shortDescription: string;
-  imageUrl: string;
-  fallbackGradient: string;
-  photoCount: number;
-  badges: string[];
-  specs: {
-    surface: string;
-    rooms?: string;
-    bathrooms?: string;
-    parking?: string;
-    landUse?: string;
-    services?: string;
-    topography?: string;
-  };
-  highlights: string[];
-  legalCertified: boolean;
-  featured: boolean;
-}
-
-export type ViewType = 'inicio' | 'propiedades' | 'tramites' | 'contacto';
-
-export interface SocialBanner {
   id: string;
-  platform: 'facebook' | 'instagram' | 'tiktok';
-  postUrl: string;
-  title: string;
-  priceFormatted: string;
-  price?: number;
-  location: string;
-  locationZone?: string;
-  imageUrl: string;
-  description: string;
-  badge?: string;
-  surface?: string;
-  rooms?: string;
-  bathrooms?: string;
-  parking?: string;
-  propertyId?: number;
-  dateAdded?: string;
+  titulo: string;
+  tipo: 'casa' | 'terreno' | 'departamento' | 'quinta';
+  precio: number;
+  ubicacion: string;
+  descripcion: string;
+  superficie: number | null;
+  habitaciones: number | null;
+  banos: number | null;
+  parqueaderos: number | null;
+  enlacePublicacion: string | null;
+  fotos: string[];
+  creadoEn: string;
 }
+
+export type Propiedad = Property;
+
+export type ViewType = 'inicio' | 'propiedades' | 'tramites' | 'contacto' | 'admin';

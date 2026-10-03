@@ -1,210 +1,239 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Property } from '../types';
 
 interface PropertyQuickViewModalProps {
   property: Property | null;
   onClose: () => void;
-  onScheduleVisit: (property: Property) => void;
-  onEditProperty?: (property: Property) => void;
+  onScheduleVisit?: (property: Property) => void;
 }
 
 export const PropertyQuickViewModal: React.FC<PropertyQuickViewModalProps> = ({
   property,
   onClose,
   onScheduleVisit,
-  onEditProperty,
 }) => {
+  const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
+
   if (!property) return null;
 
-  const waLink = `https://wa.me/593994773533?text=${encodeURIComponent(
-    `Hola, solicito información técnica y visita para: ${property.title} (${property.priceFormatted})`
-  )}`;
+  const precioFmt = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(property.precio) + ' USD';
+
+  const fotos = property.fotos && property.fotos.length > 0 ? property.fotos : [];
+  const currentPhoto = fotos[currentPhotoIdx] || '';
+
+  const waText = encodeURIComponent(
+    `Hola Cbr. Daniel Astudillo, me interesa consultar por la propiedad: ${property.titulo} (${precioFmt}) en ${property.ubicacion}.`
+  );
+  const waUrl = `https://wa.me/593994773533?text=${waText}`;
+
+  const nextPhoto = () => {
+    if (fotos.length > 1) {
+      setCurrentPhotoIdx((prev) => (prev + 1) % fotos.length);
+    }
+  };
+
+  const prevPhoto = () => {
+    if (fotos.length > 1) {
+      setCurrentPhotoIdx((prev) => (prev - 1 + fotos.length) % fotos.length);
+    }
+  };
+
+  const tipoLabel: Record<string, string> = {
+    casa: 'Casa Residencial',
+    terreno: 'Terreno / Lote',
+    departamento: 'Departamento',
+    quinta: 'Quinta Vacacional',
+  };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+    <div
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
       onClick={onClose}
     >
-      <div 
-        className="bg-white rounded-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative border border-[#e1e3e0] my-8"
+      <div
+        className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative border border-slate-200 text-slate-900 my-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md text-[#191c1b] hover:bg-[#f2f4f1] flex items-center justify-center shadow-md transition-colors cursor-pointer"
-          aria-label="Cerrar modal"
+          className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105 cursor-pointer backdrop-blur-md"
+          aria-label="Cerrar ventana"
         >
-          <span className="material-symbols-outlined text-[20px]">close</span>
+          <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
 
-        {/* Hero Photo with Scrim */}
-        <div className="relative w-full aspect-[16/9] max-h-[360px] overflow-hidden bg-slate-900">
-          <img
-            src={property.imageUrl}
-            alt={property.title}
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          
-          <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-            {property.badges.map((b, i) => {
-              const lower = b.toLowerCase();
-              const badgeClass = lower.includes('oportunidad') || lower.includes('inversión')
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
-                : lower.includes('lote') || lower.includes('terreno')
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white'
-                : 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white';
-              return (
-                <span
-                  key={i}
-                  className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase shadow-md ${badgeClass}`}
-                >
-                  {b}
-                </span>
-              );
-            })}
-          </div>
-
-          <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between text-white">
-            <div>
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">
-                {property.priceLabel}
-              </span>
-              <span className="text-3xl font-extrabold tracking-tight tabular-nums text-white drop-shadow-sm">
-                {property.priceFormatted}
-              </span>
+        {/* Gallery / Enlarged Photo Carousel */}
+        <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] max-h-[460px] bg-slate-950 overflow-hidden select-none">
+          {currentPhoto ? (
+            <img
+              src={currentPhoto}
+              alt={`${property.titulo} - foto ${currentPhotoIdx + 1}`}
+              className="w-full h-full object-contain sm:object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-400">
+              <span className="material-symbols-outlined text-5xl">photo</span>
             </div>
-            <span className="text-xs font-semibold bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[15px] text-amber-300">photo_camera</span>
-              {property.photoCount} Fotografías Verificadas
+          )}
+
+          {/* Prev / Next Arrows */}
+          {fotos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevPhoto}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer shadow-lg"
+                title="Foto anterior"
+              >
+                <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+              </button>
+              <button
+                type="button"
+                onClick={nextPhoto}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer shadow-lg"
+                title="Siguiente foto"
+              >
+                <span className="material-symbols-outlined text-[22px]">chevron_right</span>
+              </button>
+
+              {/* Photo Counter */}
+              <div className="absolute bottom-3 right-3 z-20 bg-black/75 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                {currentPhotoIdx + 1} / {fotos.length}
+              </div>
+            </>
+          )}
+
+          {/* Over-photo Tag and Price */}
+          <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-800 text-amber-300 border border-emerald-500/40 backdrop-blur-md shadow-md">
+              {tipoLabel[property.tipo] || property.tipo}
             </span>
           </div>
         </div>
 
-        {/* Content Container */}
-        <div className="p-6 md:p-8 flex flex-col gap-6">
-          {/* Title & Location */}
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
-              {property.title}
-            </h2>
-            <div className="flex items-center gap-1.5 text-slate-600 text-sm">
-              <span className="material-symbols-outlined text-[18px] text-emerald-600">location_on</span>
-              <span className="font-semibold">{property.location}</span>
-            </div>
-          </div>
-
-          {/* Quick Technical Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-[#f2f4f1] border border-[#e1e3e0]">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Superficie Total</span>
-              <span className="text-base font-bold text-[#004215]">{property.specs.surface}</span>
-            </div>
-            {property.category === 'residential' ? (
-              <>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Dormitorios</span>
-                  <span className="text-base font-bold text-[#004215]">{property.specs.rooms}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Baños</span>
-                  <span className="text-base font-bold text-[#004215]">{property.specs.bathrooms}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Parqueaderos</span>
-                  <span className="text-base font-bold text-[#004215]">{property.specs.parking}</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Uso de Suelo</span>
-                  <span className="text-base font-bold text-[#004215]">{property.specs.landUse}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Servicios</span>
-                  <span className="text-base font-bold text-[#004215]">{property.specs.services}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#717a6e] block">Topografía</span>
-                  <span className="text-base font-bold text-[#004215]">{property.specs.topography}</span>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Detailed Description */}
-          <div className="flex flex-col gap-2.5">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-[#191c1b]">
-              Descripción Arquitectónica & Entorno
-            </h4>
-            <p className="text-sm text-[#41493f] leading-relaxed">
-              {property.description}
-            </p>
-          </div>
-
-          {/* Key Attributes */}
-          <div className="flex flex-col gap-2.5">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-[#191c1b]">
-              Puntos Destacados
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {property.highlights.map((h, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-[#191c1b] bg-[#f8faf7] p-2.5 rounded-lg border border-[#eceeeb]">
-                  <span className="material-symbols-outlined text-[16px] text-[#326b00]">check_circle</span>
-                  <span>{h}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Legal Certification Guarantee Box */}
-          <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-start gap-3">
-            <span className="material-symbols-outlined text-[24px] text-emerald-700 shrink-0 mt-0.5">verified_user</span>
-            <div className="text-xs text-emerald-950 leading-relaxed">
-              <span className="font-extrabold text-emerald-900 block mb-0.5">Garantía Legal Inmo Astudillo (100% Blindaje):</span>
-              Inmueble con titulación auditada por nuestro departamento legal. Certificado de gravámenes al día, plano catastral verificado y sin prohibiciones de enajenar. Listo para suscripción inmediata de escritura.
-            </div>
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-            {onEditProperty && (
+        {/* Thumbnails row */}
+        {fotos.length > 1 && (
+          <div className="p-3 bg-slate-900 flex items-center gap-2 overflow-x-auto">
+            {fotos.map((f, idx) => (
               <button
-                onClick={() => {
-                  onClose();
-                  onEditProperty(property);
-                }}
-                className="w-full sm:w-auto py-3 px-4.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-amber-900/15 cursor-pointer active:scale-95"
-                title="Editar precios, habitaciones, metros y fotos"
+                key={idx}
+                type="button"
+                onClick={() => setCurrentPhotoIdx(idx)}
+                className={`relative w-16 h-12 rounded-lg overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                  currentPhotoIdx === idx ? 'border-amber-400 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
               >
-                <span className="material-symbols-outlined text-[18px]">edit_note</span>
-                <span>Editar Inmueble</span>
+                <img src={f} alt={`Miniatura ${idx + 1}`} className="w-full h-full object-cover" />
               </button>
+            ))}
+          </div>
+        )}
+
+        {/* Content Body */}
+        <div className="p-6 sm:p-8 space-y-6">
+          {/* Header & Price */}
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-slate-100 pb-5">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">
+                {property.titulo}
+              </h2>
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 mt-2">
+                <span className="material-symbols-outlined text-[18px] text-emerald-700">location_on</span>
+                <span>{property.ubicacion}</span>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-2xl shrink-0">
+              <span className="text-[10px] uppercase font-bold text-emerald-800 block">Precio de Venta</span>
+              <span className="text-2xl font-black text-emerald-950">{precioFmt}</span>
+            </div>
+          </div>
+
+          {/* Specs Grid (Only real data that exists) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {property.superficie !== null && property.superficie !== undefined && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-emerald-700">square_foot</span>
+                  Superficie
+                </span>
+                <span className="text-sm font-black text-slate-900 mt-1 block">{property.superficie} m²</span>
+              </div>
             )}
 
+            {property.habitaciones !== null && property.habitaciones !== undefined && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-emerald-700">bed</span>
+                  Habitaciones
+                </span>
+                <span className="text-sm font-black text-slate-900 mt-1 block">{property.habitaciones} hab.</span>
+              </div>
+            )}
+
+            {property.banos !== null && property.banos !== undefined && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-emerald-700">bathtub</span>
+                  Baños
+                </span>
+                <span className="text-sm font-black text-slate-900 mt-1 block">{property.banos} baños</span>
+              </div>
+            )}
+
+            {property.parqueaderos !== null && property.parqueaderos !== undefined && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-emerald-700">directions_car</span>
+                  Parqueaderos
+                </span>
+                <span className="text-sm font-black text-slate-900 mt-1 block">{property.parqueaderos}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
+          {property.descripcion && (
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                Descripción de la Propiedad
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50/60 p-4 rounded-2xl border border-slate-100">
+                {property.descripcion}
+              </p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 pt-3 border-t border-slate-100">
+            {/* Green button: Consultar por WhatsApp */}
             <a
-              href={waLink}
+              href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-[#25D366]/25 hover:shadow-lg active:scale-95"
+              className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-sm shadow-md shadow-[#25D366]/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
-              <span className="material-symbols-outlined text-[18px]">chat</span>
-              <span>Contactar por WhatsApp</span>
+              <span className="material-symbols-outlined text-[20px]">chat</span>
+              <span>Consultar por WhatsApp</span>
             </a>
 
-            <button
-              onClick={() => {
-                onClose();
-                onScheduleVisit(property);
-              }}
-              className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-900/15 hover:shadow-lg cursor-pointer active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-              <span>Agendar Visita</span>
-            </button>
+            {/* Optional: Ver publicación en Facebook/Instagram only if link exists */}
+            {property.enlacePublicacion && (
+              <a
+                href={property.enlacePublicacion}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto py-3.5 px-5 rounded-2xl bg-[#1877F2] hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              >
+                <span>Ver Publicación en Redes</span>
+                <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

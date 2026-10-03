@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CONVEYANCING_STEPS, LEGAL_SERVICES, FAQS } from '../data/propertiesData';
+import { CONVEYANCING_STEPS, LEGAL_SERVICES, FAQS } from '../data/conveyancingData';
 import securityPortraitImg from '../assets/images/regenerated_image_1790984978475.jpg';
 
 interface ConveyancingViewProps {

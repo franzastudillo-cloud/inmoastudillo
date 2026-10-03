@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { Property, ViewType, SocialBanner } from '../types';
-import { PROPERTIES_DATA } from '../data/propertiesData';
+import { Property, ViewType } from '../types';
 import { PropertyCard } from '../components/PropertyCard';
-import { SocialPropertyBanners } from '../components/SocialPropertyBanners';
 import securityPortraitImg from '../assets/images/regenerated_image_1790984978475.jpg';
 
 interface HomeViewProps {
@@ -12,15 +10,7 @@ interface HomeViewProps {
   onOpenValuation: () => void;
   properties?: Property[];
   isAdmin?: boolean;
-  onChangePropertyImage?: (property: Property) => void;
-  onEditProperty?: (property: Property) => void;
   onDeleteProperty?: (property: Property) => void;
-  onAddNewProperty?: () => void;
-  socialBanners?: SocialBanner[];
-  onOpenAddSocialBanner?: () => void;
-  onEditSocialBanner?: (banner: SocialBanner) => void;
-  onDeleteSocialBanner?: (bannerId: string) => void;
-  onResetSocialBanners?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -28,17 +18,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onScheduleVisit,
   onNavigate,
   onOpenValuation,
-  properties = PROPERTIES_DATA,
+  properties = [],
   isAdmin = false,
-  onChangePropertyImage,
-  onEditProperty,
   onDeleteProperty,
-  onAddNewProperty,
-  socialBanners = [],
-  onOpenAddSocialBanner,
-  onEditSocialBanner,
-  onDeleteSocialBanner,
-  onResetSocialBanners,
 }) => {
   // Search Bar State
   const [searchIntent, setSearchIntent] = useState<'comprar' | 'alquilar' | 'proyectos'>('comprar');
@@ -55,7 +37,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   const filteredFeatured = properties.filter((p) => {
     if (homeCategory === 'all') return true;
-    return p.category === homeCategory;
+    if (homeCategory === 'residential') return p.tipo === 'casa' || p.tipo === 'departamento' || p.tipo === 'quinta';
+    if (homeCategory === 'land') return p.tipo === 'terreno';
+    return true;
   });
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -270,31 +254,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </p>
           </div>
 
-          {/* Quick Header CTA to view full catalog & Admin Actions */}
+          {/* Quick Header CTA to view full catalog */}
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            {isAdmin && onOpenAddSocialBanner && (
-              <button
-                type="button"
-                onClick={onOpenAddSocialBanner}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-800 to-teal-900 hover:from-emerald-700 hover:to-teal-800 text-amber-300 font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                title="Pega un enlace de Facebook o Instagram para extraer datos y crear el inmueble automáticamente"
-              >
-                <span className="material-symbols-outlined text-[18px]">smart_toy</span>
-                <span>+ Crear con Link de Facebook / IA</span>
-              </button>
-            )}
-
-            {isAdmin && onAddNewProperty && (
-              <button
-                type="button"
-                onClick={onAddNewProperty}
-                className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[17px]">add_circle</span>
-                <span>Manual</span>
-              </button>
-            )}
-
             <button
               type="button"
               onClick={() => onNavigate('propiedades')}
@@ -309,23 +270,29 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         {/* Grid of the 3 Most Expensive Properties (Las 3 más caras) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[...properties]
-            .sort((a, b) => (b.price || 0) - (a.price || 0))
-            .slice(0, 3)
-            .map((property, idx) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                rankBadge={`#${idx + 1} Mayor Valor`}
-                onQuickView={onQuickView}
-                onScheduleVisit={onScheduleVisit}
-                onChangeImage={isAdmin ? onChangePropertyImage : undefined}
-                onEditProperty={isAdmin ? onEditProperty : undefined}
-                onDeleteProperty={isAdmin ? onDeleteProperty : undefined}
-              />
-            ))}
-        </div>
+        {properties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...properties]
+              .sort((a, b) => (b.precio || 0) - (a.precio || 0))
+              .slice(0, 3)
+              .map((property, idx) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  rankBadge={`#${idx + 1} Mayor Valor`}
+                  onQuickView={onQuickView}
+                  onScheduleVisit={onScheduleVisit}
+                  onDeleteProperty={isAdmin ? onDeleteProperty : undefined}
+                />
+              ))}
+          </div>
+        ) : (
+          <div className="p-8 rounded-2xl bg-white border border-slate-200 text-center">
+            <p className="text-sm font-semibold text-slate-700">
+              Pronto publicaremos nuevas propiedades destacadas en Puyo y Pastaza.
+            </p>
+          </div>
+        )}
 
         {/* Elegant Bottom Redirection Banner to the full catalog */}
         <div className="mt-12 bg-gradient-to-r from-emerald-950 via-[#003816] to-teal-950 rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_-15px_rgba(0,56,22,0.4)] border border-amber-300/30 relative overflow-hidden">
