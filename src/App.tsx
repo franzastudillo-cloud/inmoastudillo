@@ -66,13 +66,15 @@ export default function App() {
   const [isSeoStrategyOpen, setIsSeoStrategyOpen] = useState(false);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
 
-  // Floating welcome modal for sellers: auto-prompt after 1.8s
+  // Floating welcome card for sellers: auto-prompt after 8s
   useEffect(() => {
     const hasSeen = sessionStorage.getItem('inmo_astudillo_seller_prompt_seen');
-    if (!hasSeen) {
+    if (!hasSeen && window.location.hash !== '#admin') {
       const timer = setTimeout(() => {
-        setIsSellerModalOpen(true);
-      }, 1800);
+        if (window.location.hash !== '#admin') {
+          setIsSellerModalOpen(true);
+        }
+      }, 8000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -179,12 +181,13 @@ export default function App() {
         onClose={() => setIsSeoStrategyOpen(false)}
       />
 
-      {/* Floating Welcome Entry Modal for Sellers */}
-      <SellerWelcomeModal
-        isOpen={isSellerModalOpen}
-        onClose={handleCloseSellerModal}
-        onOpenValuation={() => setIsValuationOpen(true)}
-      />
+      {/* Floating Welcome Entry Card for Sellers */}
+      {currentView !== 'admin' && (
+        <SellerWelcomeModal
+          isOpen={isSellerModalOpen}
+          onClose={handleCloseSellerModal}
+        />
+      )}
 
       {/* Floating Instant WhatsApp Button */}
       {currentView !== 'admin' && <WhatsAppFloatingButton />}
