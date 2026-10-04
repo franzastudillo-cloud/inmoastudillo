@@ -27,4 +27,5 @@ export const iniciarSesion = (password: string) =>
   pedir('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
 export const cerrarSesion = () => pedir('/api/logout', { method: 'POST' });
 export const crearPropiedad = (form: FormData) => pedir('/api/propiedades', { method: 'POST', body: form });
+export const editarPropiedad = (id: string, form: FormData) => pedir(`/api/propiedades/${id}`, { method: 'PUT', body: form });
 export const eliminarPropiedad = (id: string) => pedir(`/api/propiedades/${id}`, { method: 'DELETE' });

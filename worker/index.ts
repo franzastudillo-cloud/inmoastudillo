@@ -159,6 +159,88 @@ async function crear(request: Request, env: Env) {
   return json({ ok: true, id }, 201);
 }
 
+function leerCampos(form: FormData) {
+  const texto = (k: string) => String(form.get(k) ?? '').trim();
+  const numero = (k: string) => {
+    const v = texto(k);
+    if (v === '') return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? n : NaN;
+  };
+  const d = {
+    titulo: texto('titulo'), tipo: texto('tipo'), precio: numero('precio'), ubicacion: texto('ubicacion'),
+    descripcion: texto('descripcion'), superficie: numero('superficie'), habitaciones: numero('habitaciones'),
+    banos: numero('banos'), parqueaderos: numero('parqueaderos'), enlace: texto('enlacePublicacion'),
+  };
+  if (!d.titulo || d.titulo.length > 120) return { error: 'El título es obligatorio (máximo 120 caracteres)' };
+  if (!TIPOS.includes(d.tipo)) return { error: 'Tipo de propiedad no válido' };
+  if (d.precio === null || Number.isNaN(d.precio) || d.precio <= 0) return { error: 'El precio no es válido' };
+  if (!d.ubicacion || d.ubicacion.length > 150) return { error: 'La ubicación es obligatoria (máximo 150 caracteres)' };
+  if (d.descripcion.length > 3000) return { error: 'La descripción es muy larga (máximo 3000 caracteres)' };
+  for (const n of [d.superficie, d.habitaciones, d.banos, d.parqueaderos]) {
+    if (Number.isNaN(n)) return { error: 'Hay un número no válido en los datos' };
+  }
+  if (d.enlace && !enlaceValido(d.enlace)) return { error: 'El enlace debe ser de Facebook o Instagram (https)' };
+  return { d };
+}
+
+async function editar(id: string, request: Request, env: Env) {
+  const fila: any = await env.DB.prepare('SELECT fotos FROM propiedades WHERE id = ?').bind(id).first();
+  if (!fila) return json({ error: 'No existe esa publicación' }, 404);
+  const actuales: string[] = JSON.parse(fila.fotos || '[]');
+  const form = await request.formData();
+  const r: any = leerCampos(form);
+  if (r.error) return json({ error: r.error }, 400);
+  const d = r.d;
+
+  const nuevos = form.getAll('fotos').filter((f: any) => typeof f !== 'string') as any[];
+  let orden: any;
+  try { orden = JSON.parse(String(form.get('orden') ?? '[]')); } catch { return json({ error: 'Orden de fotos no válido' }, 400); }
+  if (!Array.isArray(orden) || orden.length < MIN_FOTOS || orden.length > MAX_FOTOS) {
+    return json({ error: `La publicación debe tener entre ${MIN_FOTOS} y ${MAX_FOTOS} fotos` }, 400);
+  }
+  if (new Set(orden).size !== orden.length) return json({ error: 'Orden de fotos no válido' }, 400);
+  let usadosNuevos = 0;
+  for (const t of orden) {
+    if (typeof t !== 'string') return json({ error: 'Orden de fotos no válido' }, 400);
+    const m = t.match(/^nuevo:(\d+)$/);
+    if (m) {
+      if (Number(m[1]) >= nuevos.length) return json({ error: 'Orden de fotos no válido' }, 400);
+      usadosNuevos++;
+    } else if (!actuales.includes(t)) {
+      return json({ error: 'Orden de fotos no válido' }, 400);
+    }
+  }
+  if (usadosNuevos !== nuevos.length) return json({ error: 'Orden de fotos no válido' }, 400);
+  for (const f of nuevos) {
+    if (!['image/webp', 'image/jpeg', 'image/png'].includes(f.type)) return json({ error: 'Formato de foto no permitido' }, 400);
+    if (f.size > MAX_FOTO_BYTES) return json({ error: 'Una foto es demasiado pesada' }, 400);
+  }
+
+  const subidas: string[] = [];
+  try {
+    for (const f of nuevos) {
+      const ext = f.type === 'image/png' ? 'png' : f.type === 'image/jpeg' ? 'jpg' : 'webp';
+      const clave = `${crypto.randomUUID()}.${ext}`;
+      await env.FOTOS.put(clave, await f.arrayBuffer(), { httpMetadata: { contentType: f.type } });
+      subidas.push(clave);
+    }
+    const finales = orden.map((t: string) => {
+      const m = t.match(/^nuevo:(\d+)$/);
+      return m ? subidas[Number(m[1])] : t;
+    });
+    await env.DB.prepare(
+      `UPDATE propiedades SET titulo=?, tipo=?, precio=?, ubicacion=?, descripcion=?, superficie=?, habitaciones=?, banos=?, parqueaderos=?, enlace_publicacion=?, fotos=? WHERE id=?`
+    ).bind(d.titulo, d.tipo, Math.round(d.precio), d.ubicacion, d.descripcion, d.superficie, d.habitaciones, d.banos, d.parqueaderos, d.enlace || null, JSON.stringify(finales), id).run();
+    const quitadas = actuales.filter((k) => !finales.includes(k));
+    await Promise.all(quitadas.map((k) => env.FOTOS.delete(k)));
+  } catch (e) {
+    await Promise.all(subidas.map((k) => env.FOTOS.delete(k)));
+    throw e;
+  }
+  return json({ ok: true });
+}
+
 async function eliminar(id: string, env: Env) {
   const fila: any = await env.DB.prepare('SELECT fotos FROM propiedades WHERE id = ?').bind(id).first();
   if (!fila) return json({ error: 'No existe esa publicación' }, 404);
@@ -193,24 +275,28 @@ export default {
         if (origen && new URL(origen).host !== url.host) return json({ error: 'Origen no permitido' }, 403);
       }
 
-      if (pathname === '/api/login' && metodo === 'POST') return login(request, env);
+      if (pathname === '/api/login' && metodo === 'POST') return await login(request, env);
       if (pathname === '/api/logout' && metodo === 'POST') return json({ ok: true }, 200, { 'Set-Cookie': cookie('', 0) });
       if (pathname === '/api/sesion' && metodo === 'GET') return json({ admin: await esAdmin(request, env) });
-      if (pathname === '/api/propiedades' && metodo === 'GET') return listar(env);
+      if (pathname === '/api/propiedades' && metodo === 'GET') return await listar(env);
 
       if (pathname === '/api/propiedades' && metodo === 'POST') {
         if (!(await esAdmin(request, env))) return json({ error: 'No autorizado' }, 401);
-        return crear(request, env);
+        return await crear(request, env);
       }
 
       const del = pathname.match(/^\/api\/propiedades\/([a-f0-9-]{36})$/);
+      if (del && metodo === 'PUT') {
+        if (!(await esAdmin(request, env))) return json({ error: 'No autorizado' }, 401);
+        return await editar(del[1], request, env);
+      }
       if (del && metodo === 'DELETE') {
         if (!(await esAdmin(request, env))) return json({ error: 'No autorizado' }, 401);
-        return eliminar(del[1], env);
+        return await eliminar(del[1], env);
       }
 
       const f = pathname.match(/^\/api\/fotos\/([a-f0-9-]{36}\.(?:webp|jpg|png))$/);
-      if (f && metodo === 'GET') return foto(f[1], env);
+      if (f && metodo === 'GET') return await foto(f[1], env);
 
       return json({ error: 'No encontrado' }, 404);
     } catch (e) {

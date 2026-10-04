@@ -6,6 +6,7 @@ import {
   iniciarSesion,
   cerrarSesion,
   crearPropiedad,
+  editarPropiedad,
   eliminarPropiedad,
 } from '../lib/api';
 import { comprimirFoto } from '../lib/comprimirFoto';
@@ -13,6 +14,10 @@ import { comprimirFoto } from '../lib/comprimirFoto';
 interface AdminViewProps {
   onBackToHome?: () => void;
 }
+
+type FotoItem =
+  | { tipo: 'actual'; clave: string; preview: string }
+  | { tipo: 'nueva'; file: File; preview: string };
 
 export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
   const [autenticado, setAutenticado] = useState<boolean | null>(null);
@@ -26,10 +31,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
   const [cargandoLista, setCargandoLista] = useState(false);
   const [errorLista, setErrorLista] = useState<string | null>(null);
 
-  // Form mode: 'list' or 'create'
-  const [modo, setModo] = useState<'list' | 'create'>('list');
+  // Form mode: 'list' | 'create' | 'edit'
+  const [modo, setModo] = useState<'list' | 'create' | 'edit'>('list');
+  const [propiedadAEditar, setPropiedadAEditar] = useState<Propiedad | null>(null);
 
-  // Creation form state
+  // Form fields state
   const [titulo, setTitulo] = useState('');
   const [tipo, setTipo] = useState<'casa' | 'terreno' | 'departamento' | 'quinta'>('casa');
   const [precio, setPrecio] = useState('');
@@ -41,10 +47,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
   const [parqueaderos, setParqueaderos] = useState('');
   const [enlacePublicacion, setEnlacePublicacion] = useState('');
 
-  // Selected files with local preview URLs
-  const [fotosSeleccionadas, setFotosSeleccionadas] = useState<{ file: File; preview: string }[]>([]);
+  // Selected photo items (both actual and newly uploaded)
+  const [fotos, setFotos] = useState<FotoItem[]>([]);
   const [guardando, setGuardando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
+  const [comprimiendoFotos, setComprimiendoFotos] = useState(false);
   const [estadoCompresion, setEstadoCompresion] = useState<string | null>(null);
 
   // Check session on mount
@@ -123,26 +130,42 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
     }
   };
 
-  // Photo picker handler
-  const handleSeleccionarFotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Photo picker handler with compression
+  const handleSeleccionarFotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    const nuevas = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    setErrorGuardar(null);
+    setComprimiendoFotos(true);
 
-    setFotosSeleccionadas((prev) => [...prev, ...nuevas]);
-    // reset input
-    e.target.value = '';
+    try {
+      const nuevasFotos: FotoItem[] = [];
+      for (let i = 0; i < files.length; i++) {
+        setEstadoCompresion(`Optimizando foto ${i + 1} de ${files.length}...`);
+        const comprimida = await comprimirFoto(files[i]);
+        nuevasFotos.push({
+          tipo: 'nueva',
+          file: comprimida,
+          preview: URL.createObjectURL(comprimida),
+        });
+      }
+      setFotos((prev) => [...prev, ...nuevasFotos]);
+    } catch (err: any) {
+      setErrorGuardar(err.message || 'Error al optimizar las fotos seleccionadas.');
+    } finally {
+      setComprimiendoFotos(false);
+      setEstadoCompresion(null);
+      e.target.value = '';
+    }
   };
 
   // Remove photo from selection
   const handleQuitarFoto = (index: number) => {
-    setFotosSeleccionadas((prev) => {
+    setFotos((prev) => {
       const target = prev[index];
-      if (target?.preview) URL.revokeObjectURL(target.preview);
+      if (target?.tipo === 'nueva' && target.preview) {
+        URL.revokeObjectURL(target.preview);
+      }
       return prev.filter((_, idx) => idx !== index);
     });
   };
@@ -150,7 +173,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
   // Move photo to cover (first position)
   const handleMoverAPortada = (index: number) => {
     if (index === 0) return;
-    setFotosSeleccionadas((prev) => {
+    setFotos((prev) => {
       const clon = [...prev];
       const [item] = clon.splice(index, 1);
       clon.unshift(item);
@@ -170,37 +193,60 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
     setBanos('');
     setParqueaderos('');
     setEnlacePublicacion('');
-    fotosSeleccionadas.forEach((f) => URL.revokeObjectURL(f.preview));
-    setFotosSeleccionadas([]);
+    fotos.forEach((f) => {
+      if (f.tipo === 'nueva' && f.preview) {
+        URL.revokeObjectURL(f.preview);
+      }
+    });
+    setFotos([]);
+    setPropiedadAEditar(null);
     setErrorGuardar(null);
     setEstadoCompresion(null);
   };
 
-  // Submit creation form
-  const handleCrear = async (e: React.FormEvent) => {
+  // Start editing a property
+  const handleIniciarEdicion = (p: Propiedad) => {
+    resetFormulario();
+    setPropiedadAEditar(p);
+    setTitulo(p.titulo || '');
+    setTipo(p.tipo || 'casa');
+    setPrecio(p.precio != null ? String(p.precio) : '');
+    setUbicacion(p.ubicacion || '');
+    setDescripcion(p.descripcion || '');
+    setSuperficie(p.superficie != null ? String(p.superficie) : '');
+    setHabitaciones(p.habitaciones != null ? String(p.habitaciones) : '');
+    setBanos(p.banos != null ? String(p.banos) : '');
+    setParqueaderos(p.parqueaderos != null ? String(p.parqueaderos) : '');
+    setEnlacePublicacion(p.enlacePublicacion || '');
+
+    // Map existing URLs to FotoItem
+    const fotosActuales: FotoItem[] = (p.fotos || []).map((url) => {
+      const clave = url.startsWith('/api/fotos/') ? url.substring('/api/fotos/'.length) : url;
+      return {
+        tipo: 'actual',
+        clave,
+        preview: url,
+      };
+    });
+    setFotos(fotosActuales);
+    setModo('edit');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Submit form (both create and edit)
+  const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorGuardar(null);
 
-    // Validate photo count
-    if (fotosSeleccionadas.length < 3 || fotosSeleccionadas.length > 10) {
-      setErrorGuardar(`Debes subir entre 3 y 10 fotos (actualmente tienes ${fotosSeleccionadas.length}).`);
+    // Validate photo count (3 to 10 photos)
+    if (fotos.length < 3 || fotos.length > 10) {
+      setErrorGuardar(`La publicación debe tener entre 3 y 10 fotos (actualmente tienes ${fotos.length}).`);
       return;
     }
 
     setGuardando(true);
-    setEstadoCompresion('Comprimiendo y optimizando fotos en WebP...');
 
     try {
-      // Compress each photo before uploading
-      const fotosComprimidas: File[] = [];
-      for (let i = 0; i < fotosSeleccionadas.length; i++) {
-        setEstadoCompresion(`Comprimiendo foto ${i + 1} de ${fotosSeleccionadas.length}...`);
-        const comprimida = await comprimirFoto(fotosSeleccionadas[i].file);
-        fotosComprimidas.push(comprimida);
-      }
-
-      setEstadoCompresion('Enviando publicación a Cloudflare D1 y R2...');
-
       const form = new FormData();
       form.append('titulo', titulo.trim());
       form.append('tipo', tipo);
@@ -213,19 +259,41 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
       form.append('parqueaderos', parqueaderos.trim());
       form.append('enlacePublicacion', enlacePublicacion.trim());
 
-      for (const f of fotosComprimidas) {
-        form.append('fotos', f);
+      if (modo === 'create') {
+        for (const f of fotos) {
+          if (f.tipo === 'nueva') {
+            form.append('fotos', f.file);
+          }
+        }
+        await crearPropiedad(form);
+      } else if (modo === 'edit' && propiedadAEditar) {
+        const fotosNuevas = fotos.filter(
+          (f): f is { tipo: 'nueva'; file: File; preview: string } => f.tipo === 'nueva'
+        );
+
+        for (const f of fotosNuevas) {
+          form.append('fotos', f.file);
+        }
+
+        const orden = fotos.map((f) => {
+          if (f.tipo === 'actual') {
+            return f.clave;
+          }
+          const idx = fotosNuevas.indexOf(f as { tipo: 'nueva'; file: File; preview: string });
+          return `nuevo:${idx}`;
+        });
+
+        form.append('orden', JSON.stringify(orden));
+        await editarPropiedad(propiedadAEditar.id, form);
       }
 
-      await crearPropiedad(form);
       resetFormulario();
       setModo('list');
       cargarPublicaciones();
     } catch (err: any) {
-      setErrorGuardar(err.message || 'Error al crear la publicación.');
+      setErrorGuardar(err.message || 'Error al guardar la publicación.');
     } finally {
       setGuardando(false);
-      setEstadoCompresion(null);
     }
   };
 
@@ -315,7 +383,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
     );
   }
 
-  // Logged In: Only "Crear publicación", "Eliminar", and "Cerrar sesión"
+  // Logged In: List, Create, and Edit Views
   return (
     <div className="min-h-screen bg-[#f8faf7] text-slate-900 pb-24">
       {/* Admin Top Bar */}
@@ -362,11 +430,17 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-slate-200">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-[#003816] tracking-tight">
-              {modo === 'create' ? 'Crear Nueva Publicación' : 'Publicaciones Registradas'}
+              {modo === 'create'
+                ? 'Crear Nueva Publicación'
+                : modo === 'edit'
+                ? `Editar: ${propiedadAEditar?.titulo || 'Publicación'}`
+                : 'Publicaciones Registradas'}
             </h1>
             <p className="text-xs text-slate-600 mt-1">
               {modo === 'create'
                 ? 'Ingresa los datos y sube entre 3 y 10 fotos optimizadas automáticamente.'
+                : modo === 'edit'
+                ? 'Modifica los campos necesarios, añade fotos nuevas o reorganiza la portada.'
                 : `Total: ${propiedades.length} propiedades activas en base de datos D1.`}
             </p>
           </div>
@@ -400,8 +474,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
           </div>
         </div>
 
-        {/* ----------------- MODE: CREATE FORM ----------------- */}
-        {modo === 'create' && (
+        {/* ----------------- MODE: CREATE / EDIT FORM ----------------- */}
+        {(modo === 'create' || modo === 'edit') && (
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-200 max-w-4xl mx-auto">
             {errorGuardar && (
               <div className="p-4 mb-6 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 flex items-center gap-2">
@@ -417,7 +491,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
               </div>
             )}
 
-            <form onSubmit={handleCrear} className="space-y-6">
+            <form onSubmit={handleGuardar} className="space-y-6">
               {/* Photo Requirements Callout Block */}
               <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-300 text-xs text-emerald-950 space-y-1.5">
                 <div className="flex items-center gap-2 font-black text-emerald-900 text-sm mb-1">
@@ -427,7 +501,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                 <ul className="list-disc list-inside space-y-1 text-slate-700 leading-relaxed font-medium">
                   <li><b>Formatos:</b> JPG, PNG o WebP (no HEIC; en iPhone elegir &quot;Más compatible&quot;).</li>
                   <li><b>Peso:</b> máximo 8 MB por foto al elegirla; se reduce a WebP de máximo 1600 px del lado largo y menos de 400 KB.</li>
-                  <li><b>Orientación:</b> Horizontales, proporción 4:3 o 16:9. Portada: la mejor foto de la fachada.</li>
+                  <li><b>Orientación:</b> Horizontales, proporción 4:3 o 16:9. Portada: la primera foto de la lista.</li>
                   <li><b>Cantidad:</b> De 3 a 10 fotos por publicación.</li>
                   <li>Sin marcas de agua, textos ni capturas de pantalla.</li>
                   <li>Solo fotos propias de la propiedad.</li>
@@ -440,27 +514,28 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                   Fotos de la Propiedad (Mínimo 3, Máximo 10) *
                 </label>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <label className="px-5 py-3 rounded-2xl bg-emerald-800 hover:bg-emerald-700 text-amber-300 font-extrabold text-xs cursor-pointer shadow-md transition-all flex items-center gap-2 active:scale-95">
                     <span className="material-symbols-outlined text-[20px]">add_photo_alternate</span>
-                    <span>Seleccionar fotos</span>
+                    <span>{fotos.length === 0 ? 'Seleccionar fotos' : 'Agregar fotos'}</span>
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       multiple
+                      disabled={comprimiendoFotos || guardando}
                       onChange={handleSeleccionarFotos}
                       className="hidden"
                     />
                   </label>
-                  <span className="text-xs font-bold text-slate-500">
-                    {fotosSeleccionadas.length} foto(s) seleccionada(s)
+                  <span className="text-xs font-bold text-slate-600">
+                    {fotos.length} foto(s) en total {fotos.length < 3 ? `(faltan ${3 - fotos.length})` : fotos.length > 10 ? `(máximo 10, sobran ${fotos.length - 10})` : '(válido)'}
                   </span>
                 </div>
 
                 {/* Thumbnails list with reorder and delete */}
-                {fotosSeleccionadas.length > 0 && (
+                {fotos.length > 0 && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4">
-                    {fotosSeleccionadas.map((item, idx) => (
+                    {fotos.map((item, idx) => (
                       <div
                         key={idx}
                         className={`relative rounded-xl overflow-hidden border-2 bg-slate-100 aspect-[4/3] group shadow-sm ${
@@ -470,12 +545,18 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                         <img src={item.preview} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
 
                         {idx === 0 && (
-                          <div className="absolute top-1.5 left-1.5 bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm">
+                          <div className="absolute top-1.5 left-1.5 bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm z-10">
                             PORTADA
                           </div>
                         )}
 
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
+                        {item.tipo === 'nueva' && (
+                          <div className="absolute top-1.5 right-1.5 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm z-10">
+                            NUEVA
+                          </div>
+                        )}
+
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1 z-20">
                           {idx !== 0 && (
                             <button
                               type="button"
@@ -483,7 +564,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                               className="px-2 py-1 bg-amber-400 text-slate-950 text-[10px] font-black rounded-lg cursor-pointer hover:bg-amber-300"
                               title="Hacer foto de portada (primera foto)"
                             >
-                              Portada
+                              Hacer portada
                             </button>
                           )}
                           <button
@@ -654,29 +735,34 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                 />
               </div>
 
-              {/* Submit Buttons */}
+              {/* Submit & Cancel Buttons */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setModo('list')}
+                  onClick={() => {
+                    resetFormulario();
+                    setModo('list');
+                  }}
                   className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={guardando || fotosSeleccionadas.length < 3 || fotosSeleccionadas.length > 10}
+                  disabled={guardando || fotos.length < 3 || fotos.length > 10 || comprimiendoFotos}
                   className="px-6 py-2.5 rounded-xl bg-[#003816] hover:bg-[#004d1e] text-amber-300 font-black text-xs shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95 disabled:opacity-40"
                 >
                   {guardando ? (
                     <>
                       <span className="w-3.5 h-3.5 border-2 border-amber-300 border-t-transparent rounded-full animate-spin" />
-                      <span>Guardando...</span>
+                      <span>{modo === 'edit' ? 'Guardando cambios...' : 'Creando publicación...'}</span>
                     </>
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-[18px]">publish</span>
-                      <span>Crear Publicación</span>
+                      <span className="material-symbols-outlined text-[18px]">
+                        {modo === 'edit' ? 'save' : 'publish'}
+                      </span>
+                      <span>{modo === 'edit' ? 'Guardar Cambios' : 'Crear Publicación'}</span>
                     </>
                   )}
                 </button>
@@ -701,7 +787,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                 <button
                   type="button"
                   onClick={cargarPublicaciones}
-                  className="mt-3 px-4 py-1.5 bg-[#003816] text-amber-300 rounded-lg"
+                  className="mt-3 px-4 py-1.5 bg-[#003816] text-amber-300 rounded-lg cursor-pointer"
                 >
                   Reintentar
                 </button>
@@ -721,7 +807,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                     resetFormulario();
                     setModo('create');
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-[#003816] text-amber-300 font-extrabold text-xs shadow-md"
+                  className="px-5 py-2.5 rounded-xl bg-[#003816] text-amber-300 font-extrabold text-xs shadow-md cursor-pointer"
                 >
                   + Crear primera publicación
                 </button>
@@ -783,16 +869,28 @@ export const AdminView: React.FC<AdminViewProps> = ({ onBackToHome }) => {
                             <span className="text-[10px] text-slate-400">Sin enlace externo</span>
                           )}
 
-                          {/* ONLY DELETE ACTION ALLOWED */}
-                          <button
-                            type="button"
-                            onClick={() => handleEliminar(p.id, p.titulo)}
-                            className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 active:scale-95 border border-rose-200"
-                            title="Eliminar esta publicación"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">delete</span>
-                            <span>Eliminar</span>
-                          </button>
+                          {/* ACTIONS: EDIT & DELETE */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleIniciarEdicion(p)}
+                              className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 active:scale-95 border border-amber-200"
+                              title="Editar esta publicación"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">edit</span>
+                              <span>Editar</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleEliminar(p.id, p.titulo)}
+                              className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 active:scale-95 border border-rose-200"
+                              title="Eliminar esta publicación"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">delete</span>
+                              <span>Eliminar</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
