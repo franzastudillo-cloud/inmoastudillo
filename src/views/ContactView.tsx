@@ -9,6 +9,18 @@ export const ContactView: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formattedMessage = encodeURIComponent(
+      `*Consulta desde la Web - Inmo Astudillo*\n\n` +
+      `👤 *Nombre:* ${name.trim()}\n` +
+      `📱 *Teléfono / WhatsApp:* ${phone.trim()}\n` +
+      `✉️ *Correo Electrónico:* ${email.trim()}\n\n` +
+      `💬 *Mensaje o Consulta:*\n${message.trim()}`
+    );
+
+    // Open WhatsApp directly with all form fields filled in
+    window.open(`https://wa.me/593994773533?text=${formattedMessage}`, '_blank', 'noopener,noreferrer');
+
     setSent(true);
     setTimeout(() => {
       setSent(false);
@@ -132,9 +144,9 @@ export const ContactView: React.FC = () => {
                   <span className="material-symbols-outlined text-[40px] text-[#004215]">
                     mark_email_read
                   </span>
-                  <h4 className="text-lg font-bold text-[#004215]">¡Mensaje Enviado con Éxito!</h4>
+                  <h4 className="text-lg font-bold text-[#004215]">¡Mensaje Preparado en WhatsApp!</h4>
                   <p className="text-xs text-[#41493f] max-w-sm">
-                    Gracias por comunicarse con Inmo Astudillo. Cbr. Daniel Astudillo o su equipo legal le responderá a la brevedad.
+                    Se ha abierto WhatsApp con todos sus datos listos para enviar al Cbr. Daniel Astudillo.
                   </p>
                 </div>
               ) : (
@@ -198,11 +210,14 @@ export const ContactView: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-lg bg-[#004215] hover:bg-[#1a5b28] text-white text-xs font-bold transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-3.5 rounded-lg bg-[#004215] hover:bg-[#1a5b28] text-white text-xs font-bold transition-colors shadow-md cursor-pointer flex items-center justify-center gap-2 mt-2 active:scale-[0.99]"
                   >
                     <span className="material-symbols-outlined text-[18px]">send</span>
                     <span>Enviar Mensaje a Inmo Astudillo</span>
                   </button>
+                  <p className="text-[11px] text-center text-[#717a6e]">
+                    Al hacer clic, se abrirá WhatsApp con el mensaje estructurado para que el cliente solo tenga que presionar enviar.
+                  </p>
                 </form>
               )}
             </div>
