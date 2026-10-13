@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Property, ViewType } from '../types';
 import { PropertyCard } from '../components/PropertyCard';
-import securityPortraitImg from '../assets/images/regenerated_image_1790984978475.jpg';
+import securityPortraitImg from '../assets/images/regenerated_image_1790984978475.webp';
 
 interface HomeViewProps {
   onQuickView: (property: Property) => void;
@@ -32,8 +32,24 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [homeCategory, setHomeCategory] = useState<'all' | 'residential' | 'land'>('all');
   const [quickAddress, setQuickAddress] = useState('');
 
+  // Background video deferral for instant LCP and mobile data saving
+  const [isVideoAllowed, setIsVideoAllowed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 768;
+      const isSaveData = (navigator as any)?.connection?.saveData === true;
+      if (!isMobile && !isSaveData) {
+        const timer = setTimeout(() => {
+          setIsVideoAllowed(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
+
   // Security banner image
-  const securityImg = '/inmoastudillo-puyo.jpg';
+  const securityImg = '/inmoastudillo-puyo.webp';
 
   const filteredFeatured = properties.filter((p) => {
     if (homeCategory === 'all') return true;
@@ -64,18 +80,35 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* 1. CINEMATIC HERO SECTION WITH REAL ESTATE VIDEO BACKGROUND */}
       <section className="relative w-full bg-slate-950 text-white pt-16 pb-24 md:pb-32 px-6 lg:px-12 overflow-hidden">
         {/* Dynamic 10-Second Real Estate Background Video */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80"
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none" aria-hidden="true">
+          {/* LCP Base Image: loads immediately with high priority and exact dimensions */}
+          <img
+            src="/hero-poster.webp"
+            alt="Inmo Astudillo Bienes Raíces Pastaza"
+            fetchPriority="high"
+            width={1280}
+            height={720}
+            decoding="async"
             className="w-full h-full object-cover object-center scale-105 brightness-105 contrast-105"
-          >
-            <source src="/videos/inmobiliaria-bg.mp4" type="video/mp4" />
-          </video>
+          />
+
+          {isVideoAllowed && (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/hero-poster.webp"
+              aria-hidden="true"
+              tabIndex={-1}
+              className="absolute inset-0 w-full h-full object-cover object-center scale-105 brightness-105 contrast-105 transition-opacity duration-1000"
+            >
+              <source src="/videos/inmobiliaria-bg.webm" type="video/webm" />
+              <source src="/videos/inmobiliaria-bg.mp4" type="video/mp4" />
+            </video>
+          )}
+
           {/* Lightened Gradient Overlay - 50% more video clarity & vibrancy */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-[#00180a]/50" />
           <div className="absolute inset-0 bg-radial-at-c from-transparent via-black/15 to-black/40" />
@@ -445,10 +478,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div className="lg:col-span-5 relative">
             <div className="rounded-2xl overflow-hidden shadow-xl border border-[#e1e3e0] bg-[#004215] aspect-[4/3] relative">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC16BTa8UPzzmcW70xItexI23vcbnJ1XHFgMAxPwzjwiaLdUJonEgtVGcb9GqpZC_kjmwNUF2Lx0u70AF-30u-v5VW05pKjMG1lagY8qBP3EW7ufFw8CzBNUOmDKaKIpwWD-bmpZNKjfZtBPpGuh_0Qy6oFfmAsrc3sDs5nqDCgDTCaZ3ETRfFUi8dowLOPMlxwXkciid5nWSM3CtN4HXwlYzbUPv9HiP6-r5qiC77buX23k0VBiOaIHQ"
-                alt="Reunión y asesoría legal con clientes"
+                src="/asesoria-legal.webp"
+                alt="Reunión y asesoría legal con clientes en Pastaza"
+                loading="lazy"
+                decoding="async"
+                width={800}
+                height={600}
                 className="w-full h-full object-cover opacity-90"
-                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
@@ -559,6 +595,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <img
                     src={securityPortraitImg}
                     alt="Cbr. Franz Daniel Astudillo - Seguridad Inmobiliaria y Blindaje Notarial"
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={500}
                     className="w-full h-full object-cover object-top transition-all duration-700 ease-out group-hover:scale-[1.03] group-hover:contrast-[1.02]"
                   />
 

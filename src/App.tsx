@@ -1,19 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { ViewType, Property } from './types';
 import { listarPropiedades } from './lib/api';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { PropertyQuickViewModal } from './components/PropertyQuickViewModal';
-import { AppointmentModal } from './components/AppointmentModal';
-import { ValuationModal } from './components/ValuationModal';
-import { SeoStrategyModal } from './components/SeoStrategyModal';
-import { SellerWelcomeModal } from './components/SellerWelcomeModal';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { HomeView } from './views/HomeView';
-import { PortfolioView } from './views/PortfolioView';
-import { ConveyancingView } from './views/ConveyancingView';
-import { ContactView } from './views/ContactView';
-import { AdminView } from './views/AdminView';
+
+// Code splitting: secondary views and modals loaded asynchronously on demand
+const PortfolioView = lazy(() => import('./views/PortfolioView').then((m) => ({ default: m.PortfolioView })));
+const ConveyancingView = lazy(() => import('./views/ConveyancingView').then((m) => ({ default: m.ConveyancingView })));
+const ContactView = lazy(() => import('./views/ContactView').then((m) => ({ default: m.ContactView })));
+const AdminView = lazy(() => import('./views/AdminView').then((m) => ({ default: m.AdminView })));
+
+const PropertyQuickViewModal = lazy(() =>
+  import('./components/PropertyQuickViewModal').then((m) => ({ default: m.PropertyQuickViewModal }))
+);
+const AppointmentModal = lazy(() =>
+  import('./components/AppointmentModal').then((m) => ({ default: m.AppointmentModal }))
+);
+const ValuationModal = lazy(() =>
+  import('./components/ValuationModal').then((m) => ({ default: m.ValuationModal }))
+);
+const SeoStrategyModal = lazy(() =>
+  import('./components/SeoStrategyModal').then((m) => ({ default: m.SeoStrategyModal }))
+);
+const SellerWelcomeModal = lazy(() =>
+  import('./components/SellerWelcomeModal').then((m) => ({ default: m.SellerWelcomeModal }))
+);
 
 export default function App() {
   // Navigation state (supports #admin and direct hash changes)
@@ -133,61 +146,74 @@ export default function App() {
           />
         )}
 
-        {currentView === 'propiedades' && (
-          <PortfolioView
-            onNavigate={handleNavigate}
-            onOpenAppointmentModal={handleOpenGeneralAppointment}
-          />
-        )}
+        <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center"><div className="w-8 h-8 border-3 border-emerald-800 border-t-transparent rounded-full animate-spin" /></div>}>
+          {currentView === 'propiedades' && (
+            <PortfolioView
+              onNavigate={handleNavigate}
+              onOpenAppointmentModal={handleOpenGeneralAppointment}
+            />
+          )}
 
-        {currentView === 'tramites' && (
-          <ConveyancingView
-            onOpenAppointmentModal={handleOpenGeneralAppointment}
-          />
-        )}
+          {currentView === 'tramites' && (
+            <ConveyancingView
+              onOpenAppointmentModal={handleOpenGeneralAppointment}
+            />
+          )}
 
-        {currentView === 'contacto' && (
-          <ContactView />
-        )}
+          {currentView === 'contacto' && (
+            <ContactView />
+          )}
 
-        {currentView === 'admin' && (
-          <AdminView onBackToHome={() => handleNavigate('inicio')} />
-        )}
+          {currentView === 'admin' && (
+            <AdminView onBackToHome={() => handleNavigate('inicio')} />
+          )}
+        </Suspense>
       </main>
 
-      {/* Global Property Detail Modal */}
-      <PropertyQuickViewModal
-        property={quickViewProperty}
-        onClose={() => setQuickViewProperty(null)}
-        onScheduleVisit={handleScheduleVisit}
-      />
+      {/* Global Modals loaded on demand via Suspense */}
+      <Suspense fallback={null}>
+        {/* Global Property Detail Modal */}
+        {quickViewProperty && (
+          <PropertyQuickViewModal
+            property={quickViewProperty}
+            onClose={() => setQuickViewProperty(null)}
+            onScheduleVisit={handleScheduleVisit}
+          />
+        )}
 
-      {/* Global Visit & Valuation Schedule Modal */}
-      <AppointmentModal
-        isOpen={isAppointmentOpen}
-        onClose={() => setIsAppointmentOpen(false)}
-        selectedProperty={appointmentProperty}
-      />
+        {/* Global Visit & Valuation Schedule Modal */}
+        {isAppointmentOpen && (
+          <AppointmentModal
+            isOpen={isAppointmentOpen}
+            onClose={() => setIsAppointmentOpen(false)}
+            selectedProperty={appointmentProperty}
+          />
+        )}
 
-      {/* Global Online Valuation Estimator Modal */}
-      <ValuationModal
-        isOpen={isValuationOpen}
-        onClose={() => setIsValuationOpen(false)}
-      />
+        {/* Global Online Valuation Estimator Modal */}
+        {isValuationOpen && (
+          <ValuationModal
+            isOpen={isValuationOpen}
+            onClose={() => setIsValuationOpen(false)}
+          />
+        )}
 
-      {/* Global Local SEO Strategy Transparency Modal */}
-      <SeoStrategyModal
-        isOpen={isSeoStrategyOpen}
-        onClose={() => setIsSeoStrategyOpen(false)}
-      />
+        {/* Global Local SEO Strategy Transparency Modal */}
+        {isSeoStrategyOpen && (
+          <SeoStrategyModal
+            isOpen={isSeoStrategyOpen}
+            onClose={() => setIsSeoStrategyOpen(false)}
+          />
+        )}
 
-      {/* Floating Welcome Entry Card for Sellers */}
-      {currentView !== 'admin' && (
-        <SellerWelcomeModal
-          isOpen={isSellerModalOpen}
-          onClose={handleCloseSellerModal}
-        />
-      )}
+        {/* Floating Welcome Entry Card for Sellers */}
+        {currentView !== 'admin' && isSellerModalOpen && (
+          <SellerWelcomeModal
+            isOpen={isSellerModalOpen}
+            onClose={handleCloseSellerModal}
+          />
+        )}
+      </Suspense>
 
       {/* Floating Instant WhatsApp Button */}
       {currentView !== 'admin' && <WhatsAppFloatingButton />}
